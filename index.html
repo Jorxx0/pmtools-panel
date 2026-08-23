@@ -191,6 +191,8 @@
   .linea-nota .comentario { font-style: italic; }
   .chevron { display: inline-block; transition: transform 0.15s; color: var(--texto-terciario); }
   .chevron.abierto { transform: rotate(90deg); }
+  .balance.positivo { color: var(--verde); font-weight: 600; }
+  .balance.negativo { color: var(--rojo); font-weight: 600; }
 
   @media (max-width: 640px) {
     header.top .sub { display: none; }
@@ -241,6 +243,14 @@
 
   <div class="tarjeta">
     <div class="tarjeta-cabecera">
+      <h2><span class="icono-titulo"><svg viewBox="0 0 24 24" class="icono"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Cuentas</h2>
+      <div class="actualizado" id="cuentas-actualizado">—</div>
+    </div>
+    <div class="tarjeta-scroll" id="cuentas-contenido"><div class="vacio">Cargando…</div></div>
+  </div>
+
+  <div class="tarjeta">
+    <div class="tarjeta-cabecera">
       <h2><span class="icono-titulo"><svg viewBox="0 0 24 24" class="icono"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg></span> Inventario</h2>
       <div class="actualizado" id="inventario-actualizado">—</div>
     </div>
@@ -265,6 +275,17 @@
     </div>
     <div class="tarjeta-scroll" id="notas-contenido"><div class="vacio">Cargando…</div></div>
   </div>
+
+  <div class="tarjeta">
+    <div class="tarjeta-cabecera">
+      <h2><span class="icono-titulo"><svg viewBox="0 0 24 24" class="icono"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Ventas</h2>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <input type="search" class="buscador" id="ventas-buscador" placeholder="Buscar cliente…" />
+        <div class="actualizado" id="ventas-actualizado">—</div>
+      </div>
+    </div>
+    <div class="tarjeta-scroll" id="ventas-contenido"><div class="vacio">Cargando…</div></div>
+  </div>
 </div>
 
 <script type="module">
@@ -282,14 +303,45 @@ const loginEmail = document.getElementById('login-email');
 const loginPass = document.getElementById('login-pass');
 const loginError = document.getElementById('login-error');
 
-const euros = (n) => (Number(n) || 0).toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
-const eurosDec = (n) => (Number(n) || 0).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
-const numero = (n) => (Number(n) || 0).toLocaleString('es-ES');
+const euros = (n) => (Number(n) || 0).toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0, useGrouping: true });
+const eurosDec = (n) => (Number(n) || 0).toLocaleString('es-ES', { style: 'currency', currency: 'EUR', useGrouping: true });
+const numero = (n) => (Number(n) || 0).toLocaleString('es-ES', { useGrouping: true });
 const fechaCorta = (iso) => iso ? new Date(iso).toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 const iconoAlerta = '<svg viewBox="0 0 24 24" class="icono"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3ZM12 9v4M12 17h.01"/></svg>';
 const iconoCheck = '<svg viewBox="0 0 24 24" class="icono"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m22 4-10 10.01-3-3"/></svg>';
 
-let datosActuales = { inventario: null, ubicaciones: null, notas: null };
+let datosActuales = { inventario: null, ubicaciones: null, notas: null, ventas: null };
+
+/// Clave de día local (yyyy-mm-dd) a partir de una fecha ISO, usando el
+/// huso horario del navegador — igual que agrupa por día VistaCuentas en la
+/// app (calendario local, no UTC).
+function diaKey(iso) {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+const diaLegible = (key) => new Date(`${key}T12:00:00`).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+
+/// Junta Notas y Ventas por día para el balance de Cuentas, igual que
+/// ResumenDiaCuentas en la app: las notas por transferencia o pago externo
+/// no cuentan; las pendientes de pago sí cuentan igual.
+function calcularCuentas(notas, ventas) {
+  const dias = {};
+  for (const n of notas) {
+    if (n.facturaTransferencia || n.externo) continue;
+    const k = diaKey(n.fecha);
+    dias[k] = dias[k] || { notas: 0, ventas: 0 };
+    dias[k].notas += (n.lineas || []).reduce((s, l) => s + l.cantidad * l.precioUnitario, 0);
+  }
+  for (const v of ventas) {
+    const k = diaKey(v.fecha);
+    dias[k] = dias[k] || { notas: 0, ventas: 0 };
+    const base = (v.lineas || []).reduce((s, l) => s + l.cantidad * l.precioUnitario, 0);
+    dias[k].ventas += base * (1 + (v.ivaPorcentaje || 0) / 100);
+  }
+  return Object.entries(dias)
+    .map(([dia, v]) => ({ dia, notas: v.notas, ventas: v.ventas, balance: v.notas - v.ventas }))
+    .sort((a, b) => b.dia.localeCompare(a.dia));
+}
 
 async function iniciarSesion() {
   loginError.textContent = '';
@@ -315,6 +367,7 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 
 document.getElementById('recargar-btn').addEventListener('click', cargarDatos);
 document.getElementById('notas-buscador').addEventListener('input', (e) => pintarNotas(datosActuales.notas, e.target.value));
+document.getElementById('ventas-buscador').addEventListener('input', (e) => pintarVentas(datosActuales.ventas, e.target.value));
 
 async function mostrarPanel() {
   loginVista.style.display = 'none';
@@ -325,7 +378,7 @@ async function mostrarPanel() {
 async function cargarDatos() {
   const { data, error } = await supabase.from('panel_datos').select('*');
   if (error) {
-    ['inventario', 'ubicaciones', 'notas'].forEach(t => {
+    ['cuentas', 'inventario', 'ubicaciones', 'notas', 'ventas'].forEach(t => {
       document.getElementById(`${t}-contenido`).innerHTML = `<div class="vacio">Error al cargar: ${error.message}</div>`;
     });
     return;
@@ -333,9 +386,11 @@ async function cargarDatos() {
   const porTipo = Object.fromEntries((data || []).map(fila => [fila.tipo, fila]));
   datosActuales = porTipo;
   pintarStats(porTipo);
+  pintarCuentas(porTipo);
   pintarInventario(porTipo.inventario);
   pintarUbicaciones(porTipo.ubicaciones);
   pintarNotas(porTipo.notas, '');
+  pintarVentas(porTipo.ventas, '');
 }
 
 function pintarStats(porTipo) {
@@ -360,7 +415,13 @@ function pintarStats(porTipo) {
     return s + Math.max(0, total - abonado);
   }, 0);
 
+  const ventas = porTipo.ventas?.datos || [];
+  const cuentas = calcularCuentas(notas, ventas);
+  const mesActual = diaKey(new Date().toISOString()).slice(0, 7);
+  const balanceMes = cuentas.filter(c => c.dia.startsWith(mesActual)).reduce((s, c) => s + c.balance, 0);
+
   const stats = [
+    { etiqueta: 'Balance del mes', valor: eurosDec(balanceMes), detalle: 'notas − ventas', alerta: balanceMes < 0 },
     { etiqueta: 'Valor de inventario', valor: euros(valorInventario), detalle: `${numero(totalPalets)} palets` },
     { etiqueta: 'Pilas en ubicaciones', valor: numero(ubic.length), detalle: `${numero(paletsUbicados)} palets colocados` },
     { etiqueta: 'Notas pendientes', valor: numero(pendientes.length), detalle: pendientes.length ? eurosDec(importePendiente) : 'al día', alerta: pendientes.length > 0 },
@@ -374,6 +435,29 @@ function pintarStats(porTipo) {
       <div class="detalle">${s.detalle}</div>
     </div>
   `).join('');
+}
+
+function pintarCuentas(porTipo) {
+  const contenido = document.getElementById('cuentas-contenido');
+  const fNotas = porTipo.notas, fVentas = porTipo.ventas;
+  const masReciente = [fNotas?.actualizado_en, fVentas?.actualizado_en].filter(Boolean).sort().pop();
+  document.getElementById('cuentas-actualizado').textContent = masReciente ? `Actualizado ${fechaCorta(masReciente)}` : 'Sin datos todavía';
+
+  const notas = fNotas?.datos?.notas || [];
+  const ventas = fVentas?.datos || [];
+  const cuentas = calcularCuentas(notas, ventas);
+  if (!cuentas.length) { contenido.innerHTML = '<div class="vacio">Sin notas ni ventas todavía.</div>'; return; }
+
+  const filas = cuentas.map(c => `<tr>
+      <td style="text-transform:capitalize">${diaLegible(c.dia)}</td>
+      <td class="num">${eurosDec(c.notas)}</td>
+      <td class="num">${eurosDec(c.ventas)}</td>
+      <td class="num balance ${c.balance >= 0 ? 'positivo' : 'negativo'}">${eurosDec(c.balance)}</td>
+    </tr>`).join('');
+  contenido.innerHTML = `<table>
+    <thead><tr><th>Día</th><th class="num">Notas</th><th class="num">Ventas</th><th class="num">Balance</th></tr></thead>
+    <tbody>${filas}</tbody>
+  </table>`;
 }
 
 function pintarInventario(fila) {
@@ -443,23 +527,60 @@ function pintarNotas(fila, filtro) {
       `<div class="linea-nota"><span>${l.cantidad} × ${l.tipoPalet}</span><span>${eurosDec(l.precioUnitario)}/ud</span></div>`
     ).join('');
     const comentario = n.comentario ? `<div class="linea-nota comentario">"${n.comentario}"</div>` : '';
-    return `<tr class="fila-nota" data-i="${i}">
-        <td><span class="chevron" id="chev-${i}">▸</span> ${n.clienteNombre}</td>
+    return `<tr class="fila-nota">
+        <td><span class="chevron">▸</span> ${n.clienteNombre}</td>
         <td>${fechaCorta(n.fecha)}</td>
         <td class="num">${eurosDec(total)}</td>
         <td>${badge}</td>
       </tr>
-      <tr class="detalle-nota" id="det-${i}"><td colspan="4">${lineas}${comentario}</td></tr>`;
+      <tr class="detalle-nota"><td colspan="4">${lineas}${comentario}</td></tr>`;
   }).join('');
   contenido.innerHTML = `<table>
     <thead><tr><th>Cliente</th><th>Fecha</th><th class="num">Total</th><th>Estado</th></tr></thead>
     <tbody>${filas}</tbody>
   </table>`;
+  activarFilasExpandibles(contenido);
+}
+
+function pintarVentas(fila, filtro) {
+  const contenido = document.getElementById('ventas-contenido');
+  document.getElementById('ventas-actualizado').textContent = fila ? `Actualizado ${fechaCorta(fila.actualizado_en)}` : 'Sin datos todavía';
+  let ventas = fila?.datos || [];
+  if (filtro) {
+    const q = filtro.toLowerCase();
+    ventas = ventas.filter(v => v.clienteNombre.toLowerCase().includes(q));
+  }
+  if (!ventas.length) { contenido.innerHTML = '<div class="vacio">Sin ventas que mostrar.</div>'; return; }
+  const ordenadas = ventas.slice().sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+  const filas = ordenadas.map(v => {
+    const base = (v.lineas || []).reduce((s, l) => s + l.cantidad * l.precioUnitario, 0);
+    const total = base * (1 + (v.ivaPorcentaje || 0) / 100);
+    const lineas = (v.lineas || []).map(l =>
+      `<div class="linea-nota"><span>${l.cantidad} × ${l.producto}</span><span>${eurosDec(l.precioUnitario)}/ud</span></div>`
+    ).join('');
+    const comentario = v.comentario ? `<div class="linea-nota comentario">"${v.comentario}"</div>` : '';
+    return `<tr class="fila-nota">
+        <td><span class="chevron">▸</span> ${v.clienteNombre}</td>
+        <td>${fechaCorta(v.fecha)}</td>
+        <td class="num">${v.ivaPorcentaje ? `${v.ivaPorcentaje}%` : '—'}</td>
+        <td class="num">${eurosDec(total)}</td>
+      </tr>
+      <tr class="detalle-nota"><td colspan="4">${lineas}${comentario}</td></tr>`;
+  }).join('');
+  contenido.innerHTML = `<table>
+    <thead><tr><th>Cliente</th><th>Fecha</th><th class="num">IVA</th><th class="num">Total</th></tr></thead>
+    <tbody>${filas}</tbody>
+  </table>`;
+  activarFilasExpandibles(contenido);
+}
+
+/// Hace clicable cada fila ".fila-nota" para mostrar/ocultar su detalle
+/// (la fila ".detalle-nota" justo debajo), usado por Notas y Ventas.
+function activarFilasExpandibles(contenido) {
   contenido.querySelectorAll('.fila-nota').forEach(tr => {
     tr.addEventListener('click', () => {
-      const i = tr.dataset.i;
-      document.getElementById(`det-${i}`).classList.toggle('abierto');
-      document.getElementById(`chev-${i}`).classList.toggle('abierto');
+      tr.nextElementSibling.classList.toggle('abierto');
+      tr.querySelector('.chevron').classList.toggle('abierto');
     });
   });
 }
