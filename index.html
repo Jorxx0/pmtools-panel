@@ -4,6 +4,9 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Panel PMTools</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232f6fed' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='1' y='1' width='22' height='22' rx='5' fill='%23eaf1ff' stroke='none'/%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z'/%3E%3Cpath d='m3.3 7 8.7 5 8.7-5M12 22V12'/%3E%3C/svg%3E" />
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4f6f8">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0e1116">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&display=swap" rel="stylesheet">
@@ -142,7 +145,34 @@
   nav.tabs button:hover { opacity: 1; color: var(--texto); }
   nav.tabs button.activa { color: var(--acento); border-bottom-color: var(--acento); }
   .vista { display: none; padding-top: 22px; }
-  .vista.activa { display: block; }
+  .vista.activa { display: block; animation: aparecer 0.2s ease; }
+  @keyframes aparecer { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  @keyframes girar { to { transform: rotate(360deg); } }
+  #recargar-btn.cargando .icono { animation: girar 0.7s linear infinite; }
+  #recargar-btn { position: relative; }
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(12px);
+    background: var(--texto); color: var(--bg); padding: 9px 16px; border-radius: 999px;
+    font-size: 0.82rem; font-weight: 600; box-shadow: var(--sombra);
+    opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 50;
+  }
+  .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* --- Esqueletos de carga --- */
+  .skeleton {
+    background: linear-gradient(90deg, var(--borde) 25%, var(--bg) 37%, var(--borde) 63%);
+    background-size: 400% 100%; animation: brillo-skeleton 1.4s ease infinite; border-radius: 6px;
+  }
+  @keyframes brillo-skeleton { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+  .skeleton-stat .valor-stat, .skeleton-stat .detalle { visibility: hidden; position: relative; }
+  .skeleton-stat .valor-stat::after, .skeleton-stat .detalle::after {
+    content: ''; position: absolute; inset: 2px 20% 2px 0; visibility: visible;
+  }
+  .skeleton-stat .valor-stat::after { background: linear-gradient(90deg, var(--borde) 25%, var(--bg) 37%, var(--borde) 63%); background-size: 400% 100%; animation: brillo-skeleton 1.4s ease infinite; border-radius: 6px; }
+  .skeleton-stat .detalle::after { background: var(--borde); border-radius: 4px; inset: 1px 45% 1px 0; }
+  .skeleton-fila td { padding: 12px 10px; }
+  .skeleton-fila .skeleton { height: 13px; width: 70%; }
 
   /* --- Estadísticas --- */
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 28px; }
@@ -362,6 +392,8 @@
   </section>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -439,7 +471,31 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
   loginVista.style.display = 'block';
 });
 
-document.getElementById('recargar-btn').addEventListener('click', cargarDatos);
+const toast = document.getElementById('toast');
+let toastTimeout;
+function mostrarToast(texto) {
+  toast.textContent = texto;
+  toast.classList.add('visible');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.classList.remove('visible'), 2200);
+}
+
+const recargarBtn = document.getElementById('recargar-btn');
+recargarBtn.addEventListener('click', async () => {
+  if (recargarBtn.classList.contains('cargando')) return;
+  recargarBtn.classList.add('cargando');
+  recargarBtn.disabled = true;
+  try {
+    const ok = await cargarDatos();
+    mostrarToast(ok ? 'Actualizado' : 'No se pudo actualizar');
+  } catch (e) {
+    mostrarToast('No se pudo actualizar');
+  } finally {
+    recargarBtn.classList.remove('cargando');
+    recargarBtn.disabled = false;
+  }
+});
+
 document.getElementById('notas-buscador').addEventListener('input', (e) => pintarNotas(datosActuales.notas, e.target.value));
 document.getElementById('ventas-buscador').addEventListener('input', (e) => pintarVentas(datosActuales.ventas, e.target.value));
 
@@ -451,19 +507,47 @@ document.getElementById('tabs').addEventListener('click', (e) => {
   window.scrollTo({ top: 0, behavior: 'auto' });
 });
 
+/// Fila de tabla con `cols` celdas en gris animado, usada como marcador de
+/// posición mientras se espera la primera respuesta de Supabase.
+function filaSkeleton(cols) {
+  return `<tr class="skeleton-fila">${'<td><div class="skeleton"></div></td>'.repeat(cols)}</tr>`;
+}
+
+/// Rellena estadísticas y tablas con esqueletos animados antes de la primera
+/// carga, para que la pantalla no salte de "Cargando…" a contenido real.
+function mostrarEsqueletos() {
+  document.getElementById('stats').innerHTML = Array(5).fill(`
+    <div class="stat skeleton-stat">
+      <div class="etiqueta">&nbsp;</div>
+      <div class="valor-stat">0</div>
+      <div class="detalle">&nbsp;</div>
+    </div>
+  `).join('');
+  const filas3 = Array(3).fill(null).map(() => filaSkeleton(4)).join('');
+  document.getElementById('cuentas-contenido').innerHTML = `<table><tbody>${filas3}</tbody></table>`;
+  document.getElementById('inventario-contenido').innerHTML = `<table><tbody>${Array(3).fill(null).map(() => filaSkeleton(7)).join('')}</tbody></table>`;
+  document.getElementById('ubicaciones-contenido').innerHTML = `<table><tbody>${filas3}</tbody></table>`;
+  document.getElementById('notas-contenido').innerHTML = `<table><tbody>${filas3}</tbody></table>`;
+  document.getElementById('ventas-contenido').innerHTML = `<table><tbody>${filas3}</tbody></table>`;
+  document.getElementById('grafico-contenido').innerHTML = '<div class="vacio">Cargando…</div>';
+}
+
 async function mostrarPanel() {
   loginVista.style.display = 'none';
   datosVista.style.display = 'block';
+  mostrarEsqueletos();
   await cargarDatos();
 }
 
+/// Trae el snapshot de Supabase y repinta todo el panel.
+/// - Returns: true si se cargó correctamente, false si hubo un error de red o de la API.
 async function cargarDatos() {
   const { data, error } = await supabase.from('panel_datos').select('*');
   if (error) {
     ['cuentas', 'inventario', 'ubicaciones', 'notas', 'ventas'].forEach(t => {
       document.getElementById(`${t}-contenido`).innerHTML = `<div class="vacio">Error al cargar: ${error.message}</div>`;
     });
-    return;
+    return false;
   }
   const porTipo = Object.fromEntries((data || []).map(fila => [fila.tipo, fila]));
   datosActuales = porTipo;
@@ -475,6 +559,7 @@ async function cargarDatos() {
   pintarUbicaciones(porTipo.ubicaciones);
   pintarNotas(porTipo.notas, '');
   pintarVentas(porTipo.ventas, '');
+  return true;
 }
 
 function pintarStats(porTipo) {
