@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Panel PMTools</title>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --panel: #131a22;
+    --panel-border: #212b36;
+    --texto: #e8edf2;
+    --texto-secundario: #8a97a5;
+    --azul: #4f9dff;
+    --verde: #35c48f;
+    --rojo: #ff6b6b;
+    --naranja: #ffb454;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--texto);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .contenedor { max-width: 960px; margin: 0 auto; padding: 20px 16px 60px; }
+  header.top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 0 20px;
+  }
+  header.top h1 { font-size: 1.1rem; margin: 0; font-weight: 600; }
+  header.top .sub { color: var(--texto-secundario); font-size: 0.8rem; }
+  button {
+    font: inherit;
+    background: var(--azul);
+    color: #04101d;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button.secundario {
+    background: transparent;
+    color: var(--texto-secundario);
+    border: 1px solid var(--panel-border);
+  }
+  button:disabled { opacity: 0.5; cursor: default; }
+
+  /* --- Login --- */
+  #login-vista {
+    max-width: 360px;
+    margin: 15vh auto 0;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    padding: 28px;
+  }
+  #login-vista h2 { margin-top: 0; font-size: 1.1rem; }
+  #login-vista label { display: block; font-size: 0.8rem; color: var(--texto-secundario); margin: 14px 0 6px; }
+  #login-vista input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--panel-border);
+    color: var(--texto);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+  #login-vista button { width: 100%; margin-top: 20px; }
+  #login-error { color: var(--rojo); font-size: 0.85rem; margin-top: 12px; min-height: 1em; }
+
+  /* --- Datos --- */
+  .tarjeta {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+  .tarjeta h2 {
+    margin: 0 0 4px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tarjeta .actualizado { color: var(--texto-secundario); font-size: 0.75rem; margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--panel-border); }
+  th { color: var(--texto-secundario); font-weight: 500; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .badge.bajo { background: rgba(255,107,107,0.15); color: var(--rojo); }
+  .badge.alto { background: rgba(255,180,84,0.15); color: var(--naranja); }
+  .badge.pendiente { background: rgba(255,180,84,0.15); color: var(--naranja); }
+  .badge.saldada { background: rgba(53,196,143,0.15); color: var(--verde); }
+  .vacio { color: var(--texto-secundario); font-size: 0.85rem; padding: 10px 0; }
+  .resumen-notas summary { cursor: pointer; padding: 8px 0; font-size: 0.85rem; }
+  .resumen-notas[open] summary { color: var(--azul); }
+  .linea-nota { padding: 6px 0 6px 14px; font-size: 0.82rem; color: var(--texto-secundario); border-left: 2px solid var(--panel-border); margin-left: 4px; }
+</style>
+</head>
+<body>
+
+<div id="login-vista">
+  <h2>Panel PMTools</h2>
+  <label for="login-email">Email</label>
+  <input id="login-email" type="email" autocomplete="username" />
+  <label for="login-pass">Contraseña</label>
+  <input id="login-pass" type="password" autocomplete="current-password" />
+  <button id="login-btn">Entrar</button>
+  <div id="login-error"></div>
+</div>
+
+<div class="contenedor" id="datos-vista" style="display:none">
+  <header class="top">
+    <div>
+      <h1>Panel PMTools</h1>
+      <div class="sub">Solo lectura — los datos se suben desde la app</div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="secundario" id="recargar-btn">Recargar</button>
+      <button class="secundario" id="logout-btn">Salir</button>
+    </div>
+  </header>
+
+  <div class="tarjeta">
+    <h2>📦 Inventario</h2>
+    <div class="actualizado" id="inventario-actualizado">—</div>
+    <div id="inventario-contenido"><div class="vacio">Cargando…</div></div>
+  </div>
+
+  <div class="tarjeta">
+    <h2>📍 Ubicaciones</h2>
+    <div class="actualizado" id="ubicaciones-actualizado">—</div>
+    <div id="ubicaciones-contenido"><div class="vacio">Cargando…</div></div>
+  </div>
+
+  <div class="tarjeta">
+    <h2>🧾 Notas</h2>
+    <div class="actualizado" id="notas-actualizado">—</div>
+    <div id="notas-contenido"><div class="vacio">Cargando…</div></div>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+// Mismo proyecto que usa PMTools para subir el snapshot (ver PanelSupabase.swift).
+const SUPABASE_URL = 'https://plladparekwaxsmsbxon.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_M9KPR6mrulO1HAC5369SPA_W1KTXYiy';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const loginVista = document.getElementById('login-vista');
+const datosVista = document.getElementById('datos-vista');
+const loginEmail = document.getElementById('login-email');
+const loginPass = document.getElementById('login-pass');
+const loginError = document.getElementById('login-error');
+
+const euros = (n) => (Number(n) || 0).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+const fechaCorta = (iso) => iso ? new Date(iso).toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+
+async function iniciarSesion() {
+  loginError.textContent = '';
+  const { error } = await supabase.auth.signInWithPassword({
+    email: loginEmail.value.trim(),
+    password: loginPass.value,
+  });
+  if (error) {
+    loginError.textContent = 'No se pudo iniciar sesión: ' + error.message;
+    return;
+  }
+  mostrarPanel();
+}
+
+document.getElementById('login-btn').addEventListener('click', iniciarSesion);
+loginPass.addEventListener('keydown', (e) => { if (e.key === 'Enter') iniciarSesion(); });
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  datosVista.style.display = 'none';
+  loginVista.style.display = 'block';
+});
+
+document.getElementById('recargar-btn').addEventListener('click', cargarDatos);
+
+async function mostrarPanel() {
+  loginVista.style.display = 'none';
+  datosVista.style.display = 'block';
+  await cargarDatos();
+}
+
+async function cargarDatos() {
+  const { data, error } = await supabase.from('panel_datos').select('*');
+  if (error) {
+    ['inventario', 'ubicaciones', 'notas'].forEach(t => {
+      document.getElementById(`${t}-contenido`).innerHTML = `<div class="vacio">Error al cargar: ${error.message}</div>`;
+    });
+    return;
+  }
+  const porTipo = Object.fromEntries((data || []).map(fila => [fila.tipo, fila]));
+  pintarInventario(porTipo.inventario);
+  pintarUbicaciones(porTipo.ubicaciones);
+  pintarNotas(porTipo.notas);
+}
+
+function pintarInventario(fila) {
+  const contenido = document.getElementById('inventario-contenido');
+  document.getElementById('inventario-actualizado').textContent = fila ? `Actualizado: ${fechaCorta(fila.actualizado_en)}` : 'Sin datos todavía';
+  const items = fila?.datos || [];
+  if (!items.length) { contenido.innerHTML = '<div class="vacio">Sin palets en Inventario.</div>'; return; }
+  const filas = items.map(p => {
+    const total = p.pilas * p.paletsPorpila + p.paletsRestantes;
+    let badge = '';
+    if (p.umbralMinimo != null && p.pilas < p.umbralMinimo) badge = '<span class="badge bajo">Stock bajo</span>';
+    else if (p.umbralMaximo != null && p.pilas > p.umbralMaximo) badge = '<span class="badge alto">Exceso</span>';
+    return `<tr>
+      <td>${p.nombre} ${badge}</td>
+      <td class="num">${p.pilas}</td>
+      <td class="num">${p.paletsPorpila}</td>
+      <td class="num">${p.paletsRestantes}</td>
+      <td class="num">${total}</td>
+      <td class="num">${euros(p.precio)}</td>
+    </tr>`;
+  }).join('');
+  contenido.innerHTML = `<table>
+    <thead><tr><th>Tipo</th><th class="num">Pilas</th><th class="num">P/pila</th><th class="num">Sueltos</th><th class="num">Total</th><th class="num">Precio</th></tr></thead>
+    <tbody>${filas}</tbody>
+  </table>`;
+}
+
+function pintarUbicaciones(fila) {
+  const contenido = document.getElementById('ubicaciones-contenido');
+  document.getElementById('ubicaciones-actualizado').textContent = fila ? `Actualizado: ${fechaCorta(fila.actualizado_en)}` : 'Sin datos todavía';
+  const items = (fila?.datos || []).slice().sort((a, b) =>
+    a.nave - b.nave || a.pasillo - b.pasillo || a.posicion - b.posicion
+  );
+  if (!items.length) { contenido.innerHTML = '<div class="vacio">Sin pilas en Ubicaciones.</div>'; return; }
+  const filas = items.map(u => `<tr>
+      <td>${u.nave}.${u.pasillo}.${u.posicion}</td>
+      <td>${u.tipoPalet}</td>
+      <td class="num">${u.cantidad}</td>
+      <td>${u.comentario || ''}</td>
+    </tr>`).join('');
+  contenido.innerHTML = `<table>
+    <thead><tr><th>Código</th><th>Tipo</th><th class="num">Cantidad</th><th>Comentario</th></tr></thead>
+    <tbody>${filas}</tbody>
+  </table>`;
+}
+
+function pintarNotas(fila) {
+  const contenido = document.getElementById('notas-contenido');
+  document.getElementById('notas-actualizado').textContent = fila ? `Actualizado: ${fechaCorta(fila.actualizado_en)}` : 'Sin datos todavía';
+  const notas = fila?.datos?.notas || [];
+  if (!notas.length) { contenido.innerHTML = '<div class="vacio">Sin notas.</div>'; return; }
+  const ordenadas = notas.slice().sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+  contenido.innerHTML = ordenadas.map(n => {
+    const total = (n.lineas || []).reduce((s, l) => s + l.cantidad * l.precioUnitario, 0);
+    const abonado = (n.abonos || []).reduce((s, a) => s + a.importe, 0);
+    const pendiente = Math.max(0, total - abonado);
+    const saldada = (n.abonos || []).length > 0 && pendiente <= 0.005;
+    let badge = '';
+    if (n.pendientePago && !saldada) badge = '<span class="badge pendiente">Pendiente</span>';
+    else if (saldada) badge = '<span class="badge saldada">Saldada</span>';
+    const lineas = (n.lineas || []).map(l =>
+      `<div class="linea-nota">${l.cantidad} × ${l.tipoPalet} — ${euros(l.precioUnitario)}/ud</div>`
+    ).join('');
+    return `<details class="resumen-notas">
+      <summary>${n.clienteNombre} — ${euros(total)} · ${fechaCorta(n.fecha)} ${badge}</summary>
+      ${lineas}
+      ${n.comentario ? `<div class="linea-nota">"${n.comentario}"</div>` : ''}
+    </details>`;
+  }).join('');
+}
+
+// Si ya hay sesión guardada en el navegador, entrar directo sin pedir login.
+supabase.auth.getSession().then(({ data }) => {
+  if (data.session) mostrarPanel();
+});
+</script>
+</body>
+</html>
