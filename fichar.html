@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Fichar · PMTools</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232f6fed' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='1' y='1' width='22' height='22' rx='5' fill='%23eaf1ff' stroke='none'/%3E%3Ccircle cx='12' cy='12' r='7'/%3E%3Cpath d='M12 8.5V12l2.5 1.5'/%3E%3C/svg%3E" />
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4f6f8">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0e1116">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Fichar">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  /* Mismos tokens de color que el panel (index.html) para que combine. */
+  :root {
+    --bg: #f4f6f8;
+    --superficie: #ffffff;
+    --borde: #e4e8ec;
+    --texto: #14181d;
+    --texto-secundario: #6b7684;
+    --texto-terciario: #9aa4b0;
+    --acento: #2f6fed;
+    --acento-suave: #eaf1ff;
+    --verde: #1a9c6d;
+    --verde-suave: #e5f7f0;
+    --rojo: #d93b3b;
+    --rojo-suave: #fbeaea;
+    --naranja: #c97a12;
+    --naranja-suave: #fbf1de;
+    --sombra: 0 1px 2px rgba(20,24,29,0.04), 0 8px 24px -12px rgba(20,24,29,0.08);
+    --radio: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1116;
+      --superficie: #171b22;
+      --borde: #262c35;
+      --texto: #eef1f5;
+      --texto-secundario: #9aa5b3;
+      --texto-terciario: #6b7684;
+      --acento: #5b9bff;
+      --acento-suave: rgba(91,155,255,0.12);
+      --verde: #3ecf8e;
+      --verde-suave: rgba(62,207,142,0.12);
+      --rojo: #ff6b6b;
+      --rojo-suave: rgba(255,107,107,0.12);
+      --naranja: #f2a93c;
+      --naranja-suave: rgba(242,169,60,0.12);
+      --sombra: 0 1px 2px rgba(0,0,0,0.2), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--texto);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-size: 15px;
+  }
+  h1, h2, h3, .grande { font-family: "Inter Tight", "Inter", sans-serif; }
+  .contenedor {
+    max-width: 460px;
+    margin: 0 auto;
+    padding: max(20px, env(safe-area-inset-top)) 18px calc(28px + env(safe-area-inset-bottom));
+  }
+
+  /* --- Cabecera --- */
+  .marca { display: flex; align-items: center; gap: 10px; margin: 6px 0 20px; }
+  .marca .icono-marca {
+    width: 36px; height: 36px; border-radius: 10px; background: var(--acento-suave);
+    display: flex; align-items: center; justify-content: center; color: var(--acento); flex-shrink: 0;
+  }
+  .marca .icono-marca svg { width: 20px; height: 20px; }
+  .marca h1 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+  .marca .sub { color: var(--texto-secundario); font-size: 0.78rem; margin-top: 1px; }
+
+  .tarjeta {
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    padding: 22px;
+    box-shadow: var(--sombra);
+    margin-bottom: 16px;
+  }
+
+  label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--texto-secundario); margin: 0 0 7px; }
+
+  input[type=text], textarea, input[type=time] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--borde);
+    color: var(--texto);
+    border-radius: 10px;
+    padding: 12px 13px;
+    font: inherit;
+    font-size: 1rem;
+  }
+  input:focus, textarea:focus { outline: 2px solid var(--acento); outline-offset: -1px; }
+  textarea { resize: vertical; min-height: 72px; }
+
+  button {
+    font: inherit;
+    background: var(--acento);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 13px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.06s;
+    width: 100%;
+  }
+  button:active { transform: scale(0.985); }
+  button:hover { opacity: 0.93; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  button.secundario { background: var(--superficie); color: var(--texto-secundario); border: 1px solid var(--borde); }
+  button.enlace {
+    background: none; color: var(--acento); width: auto; padding: 8px;
+    font-weight: 500; font-size: 0.9rem;
+  }
+
+  .icono { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -4px; }
+
+  /* --- Teclado de código --- */
+  .titulo-codigo { text-align: center; font-size: 1.05rem; font-weight: 600; margin: 4px 0 2px; }
+  .pin-puntos { display: flex; gap: 16px; justify-content: center; margin: 18px 0 24px; }
+  .pin-puntos span {
+    width: 15px; height: 15px; border-radius: 50%;
+    border: 2px solid var(--texto-terciario); transition: all 0.12s;
+  }
+  .pin-puntos span.lleno { background: var(--acento); border-color: var(--acento); }
+  .pin-puntos.error span { border-color: var(--rojo); animation: sacudir 0.35s; }
+  @keyframes sacudir { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+  .teclado { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .teclado button {
+    background: var(--superficie); color: var(--texto); border: 1px solid var(--borde);
+    font-size: 1.5rem; font-weight: 500; padding: 18px 0; border-radius: 14px;
+    font-family: "Inter Tight", sans-serif;
+  }
+  .teclado button.vacio { background: none; border: none; cursor: default; }
+  .teclado button:active { background: var(--acento-suave); }
+
+  /* --- Confirmación --- */
+  .confirmacion { text-align: center; padding: 12px 0; }
+  .confirmacion .circulo {
+    width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 18px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .confirmacion .circulo svg { width: 42px; height: 42px; stroke-width: 2.5; }
+  .confirmacion.entrada .circulo { background: var(--verde-suave); color: var(--verde); }
+  .confirmacion.salida .circulo { background: var(--acento-suave); color: var(--acento); }
+  .confirmacion .tipo { font-size: 1.6rem; font-weight: 700; }
+  .confirmacion .hora { font-size: 2.6rem; font-weight: 700; letter-spacing: -0.02em; margin: 2px 0 4px; }
+  .confirmacion .quien { color: var(--texto-secundario); font-size: 0.95rem; }
+
+  /* --- Mis fichajes --- */
+  .segmentado { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--borde); border-radius: 11px; padding: 4px; margin-bottom: 16px; }
+  .segmentado button {
+    flex: 1; background: none; color: var(--texto-secundario); padding: 8px 4px;
+    border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  }
+  .segmentado button.activo { background: var(--superficie); color: var(--texto); box-shadow: var(--sombra); }
+
+  .dia { border-top: 1px solid var(--borde); padding: 14px 0; }
+  .dia:first-child { border-top: none; }
+  .dia-cab { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .dia-fecha { font-weight: 600; font-size: 0.92rem; text-transform: capitalize; }
+  .dia-horas { font-family: "Inter Tight", sans-serif; font-weight: 700; font-size: 1.05rem; }
+  .dia-dif { font-size: 0.78rem; font-weight: 600; margin-left: 8px; }
+  .dif-pos { color: var(--verde); }
+  .dif-neg { color: var(--rojo); }
+  .marcas { display: flex; flex-wrap: wrap; gap: 6px; }
+  .marca-pill {
+    font-size: 0.8rem; padding: 4px 9px; border-radius: 7px;
+    background: var(--bg); border: 1px solid var(--borde); color: var(--texto-secundario);
+  }
+  .marca-pill.e { color: var(--verde); }
+  .marca-pill.s { color: var(--acento); }
+  .marca-pill.abierta { border-style: dashed; color: var(--naranja); }
+
+  .total-periodo {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 14px 16px; background: var(--acento-suave); border-radius: 12px; margin-bottom: 4px;
+  }
+  .total-periodo .n { font-family: "Inter Tight", sans-serif; font-weight: 700; font-size: 1.3rem; color: var(--acento); }
+
+  .aviso {
+    font-size: 0.82rem; color: var(--rojo); background: var(--rojo-suave);
+    border-radius: 9px; padding: 10px 12px; margin-top: 12px;
+  }
+  .ok-msg {
+    font-size: 0.85rem; color: var(--verde); background: var(--verde-suave);
+    border-radius: 9px; padding: 10px 12px; margin-top: 12px; text-align: center;
+  }
+  .vacio { color: var(--texto-terciario); text-align: center; padding: 28px 0; font-size: 0.9rem; }
+  .cargando { color: var(--texto-terciario); text-align: center; padding: 24px 0; font-size: 0.9rem; }
+
+  .fila-botones { display: flex; gap: 10px; margin-top: 10px; }
+  .fila-botones button { flex: 1; }
+
+  /* --- Editor de tramos (solicitud) --- */
+  .tramo-fila { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .tramo-fila input[type=time] { flex: 1; }
+  .tramo-fila .quitar { width: 38px; flex-shrink: 0; padding: 10px 0; background: var(--rojo-suave); color: var(--rojo); border: none; }
+  .dias-semana { display: flex; gap: 6px; margin: 4px 0 2px; }
+  .dias-semana button {
+    flex: 1; padding: 9px 0; background: var(--bg); border: 1px solid var(--borde);
+    color: var(--texto-secundario); border-radius: 9px; font-size: 0.82rem; font-weight: 600;
+  }
+  .dias-semana button.activo { background: var(--acento); color: #fff; border-color: var(--acento); }
+
+  .pie { text-align: center; color: var(--texto-terciario); font-size: 0.75rem; margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="contenedor">
+
+  <div class="marca">
+    <div class="icono-marca">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Fichar</h1>
+      <div class="sub" id="reloj">—</div>
+    </div>
+  </div>
+
+  <!-- 1 · Código de empleado -->
+  <section id="vista-login" class="tarjeta" hidden>
+    <div class="titulo-codigo" id="titulo-codigo">Introduce tu código</div>
+    <div class="pin-puntos" id="pin-puntos"><span></span><span></span><span></span><span></span></div>
+    <div class="teclado" id="teclado"></div>
+    <div class="aviso" id="login-error" hidden></div>
+    <button class="enlace" id="btn-modo-ver" style="display:block; margin:14px auto 0;">Solo ver mis fichajes</button>
+  </section>
+
+  <!-- 2 · Confirmación de fichaje -->
+  <section id="vista-confirmacion" class="tarjeta" hidden>
+    <div class="confirmacion" id="confirmacion">
+      <div class="circulo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <div class="tipo" id="conf-tipo">Entrada</div>
+      <div class="hora" id="conf-hora">08:00</div>
+      <div class="quien" id="conf-quien">—</div>
+    </div>
+    <div class="fila-botones">
+      <button class="secundario" id="btn-ver-mis">Ver mis fichajes</button>
+      <button id="btn-hecho">Hecho</button>
+    </div>
+  </section>
+
+  <!-- 3 · Mis fichajes -->
+  <section id="vista-fichajes" class="tarjeta" hidden>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h2 style="margin:0; font-size:1.05rem;" id="fichajes-titulo">Mis fichajes</h2>
+      <button class="enlace" id="btn-fichar-ahora">Fichar</button>
+    </div>
+    <div class="segmentado" id="rango">
+      <button data-rango="hoy" class="activo">Hoy</button>
+      <button data-rango="semana">Semana</button>
+      <button data-rango="mes">Mes</button>
+      <button data-rango="todo">Todo</button>
+    </div>
+    <div id="total-periodo"></div>
+    <div id="lista-fichajes" class="cargando">Cargando…</div>
+    <div class="fila-botones" style="margin-top:16px;">
+      <button class="secundario" id="btn-solicitar">Solicitar cambio de horario</button>
+    </div>
+    <button class="enlace" id="btn-salir" style="display:block; margin:10px auto 0;">Salir</button>
+  </section>
+
+  <!-- 4 · Solicitar cambio de horario -->
+  <section id="vista-solicitud" class="tarjeta" hidden>
+    <h2 style="margin:0 0 4px; font-size:1.05rem;">Solicitar cambio de horario</h2>
+    <p style="color:var(--texto-secundario); font-size:0.85rem; margin:0 0 16px;">
+      Se enviará a administración para su revisión.
+    </p>
+
+    <label>Tramos de la jornada</label>
+    <div id="editor-tramos"></div>
+    <button class="secundario" id="btn-add-tramo" style="margin-top:2px;">+ Añadir tramo</button>
+
+    <label style="margin-top:18px;">Días de trabajo</label>
+    <div class="dias-semana" id="dias-semana"></div>
+
+    <label style="margin-top:18px;">Motivo (opcional)</label>
+    <textarea id="solicitud-mensaje" placeholder="Explica brevemente el cambio…"></textarea>
+
+    <div class="ok-msg" id="solicitud-ok" hidden>Solicitud enviada. Administración la revisará.</div>
+    <div class="aviso" id="solicitud-error" hidden></div>
+
+    <div class="fila-botones" style="margin-top:16px;">
+      <button class="secundario" id="btn-cancelar-solicitud">Cancelar</button>
+      <button id="btn-enviar-solicitud">Enviar</button>
+    </div>
+  </section>
+
+  <div class="pie">PMTools · control horario</div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+// Mismo proyecto Supabase que el panel (ver PanelSupabase.swift / index.html).
+const SUPABASE_URL = 'https://plladparekwaxsmsbxon.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_M9KPR6mrulO1HAC5369SPA_W1KTXYiy';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
+
+const DIAS_CORTOS = ['', 'L', 'M', 'X', 'J', 'V', 'S', 'D'];
+const $ = (id) => document.getElementById(id);
+
+// Sesión ligera del empleado (solo el código, en sessionStorage para sobrevivir
+// a recargas; se borra al pulsar "Salir").
+let sesion = null;   // { codigo, nombre }
+try {
+  const guardada = sessionStorage.getItem('fichaje_sesion');
+  if (guardada) sesion = JSON.parse(guardada);
+} catch (e) {}
+function guardarSesion(s) {
+  sesion = s;
+  try { sessionStorage.setItem('fichaje_sesion', JSON.stringify(s)); } catch (e) {}
+}
+function salir() {
+  sesion = null;
+  try { sessionStorage.removeItem('fichaje_sesion'); } catch (e) {}
+  codigoBuffer = '';
+  accionTrasCodigo = 'fichar';
+  reiniciarLogin();
+  mostrar('vista-login');
+}
+
+// --- Reloj de cabecera ---
+function pintarReloj() {
+  const ahora = new Date();
+  $('reloj').textContent = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
+    + ' · ' + ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+}
+pintarReloj();
+setInterval(pintarReloj, 10000);
+
+// --- Navegación entre vistas ---
+const VISTAS = ['vista-login', 'vista-confirmacion', 'vista-fichajes', 'vista-solicitud'];
+function mostrar(id) {
+  for (const v of VISTAS) $(v).hidden = (v !== id);
+  window.scrollTo(0, 0);
+}
+
+// --- Formateo ---
+const fmtHora = (iso) => new Date(iso).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+const fmtHM = (min) => {
+  const s = min < 0 ? '-' : '';
+  min = Math.abs(Math.round(min));
+  return `${s}${Math.floor(min / 60)}h ${String(min % 60).padStart(2, '0')}m`;
+};
+function claveDia(iso) {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+const diaLegible = (key) => new Date(`${key}T12:00:00`).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+
+// ========================================================================
+//  1 · LOGIN (código de 4 dígitos)
+// ========================================================================
+let codigoBuffer = '';
+let accionTrasCodigo = 'fichar';   // 'fichar' | 'ver'
+
+function reiniciarLogin() {
+  codigoBuffer = '';
+  pintarPuntos();
+  $('login-error').hidden = true;
+  $('titulo-codigo').textContent = accionTrasCodigo === 'ver' ? 'Código para ver tus fichajes' : 'Introduce tu código';
+  $('btn-modo-ver').textContent = accionTrasCodigo === 'ver' ? 'Fichar' : 'Solo ver mis fichajes';
+}
+
+$('btn-modo-ver').addEventListener('click', () => {
+  accionTrasCodigo = accionTrasCodigo === 'ver' ? 'fichar' : 'ver';
+  reiniciarLogin();
+});
+
+// Teclado numérico
+const teclado = $('teclado');
+['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'].forEach((t) => {
+  const b = document.createElement('button');
+  b.textContent = t;
+  if (t === '') { b.className = 'vacio'; b.disabled = true; }
+  else b.addEventListener('click', () => pulsarTecla(t));
+  teclado.appendChild(b);
+});
+window.addEventListener('keydown', (e) => {
+  if ($('vista-login').hidden) return;
+  if (/^[0-9]$/.test(e.key)) pulsarTecla(e.key);
+  else if (e.key === 'Backspace') pulsarTecla('⌫');
+});
+
+function pulsarTecla(t) {
+  if ($('login-error').hidden === false) $('login-error').hidden = true;
+  if (t === '⌫') codigoBuffer = codigoBuffer.slice(0, -1);
+  else if (codigoBuffer.length < 4) codigoBuffer += t;
+  pintarPuntos();
+  if (codigoBuffer.length === 4) enviarCodigo();
+}
+function pintarPuntos(error) {
+  const cont = $('pin-puntos');
+  cont.classList.toggle('error', !!error);
+  [...cont.children].forEach((s, i) => s.classList.toggle('lleno', i < codigoBuffer.length));
+}
+
+async function enviarCodigo() {
+  const codigo = codigoBuffer;
+  bloquearTeclado(true);
+
+  if (accionTrasCodigo === 'ver') {
+    const { data, error } = await supabase.rpc('fichaje_validar_codigo', { p_codigo: codigo });
+    bloquearTeclado(false);
+    if (error) return codigoFallido();
+    guardarSesion({ codigo, nombre: data.nombre });
+    abrirMisFichajes();
+    return;
+  }
+
+  const { data, error } = await supabase.rpc('fichaje_marcar_codigo', { p_codigo: codigo, p_origen: 'web' });
+  bloquearTeclado(false);
+  if (error) return codigoFallido();
+
+  guardarSesion({ codigo, nombre: data.nombre });
+  mostrarConfirmacion(data);
+}
+
+function codigoFallido() {
+  pintarPuntos(true);
+  $('login-error').textContent = 'Código no válido.';
+  $('login-error').hidden = false;
+  setTimeout(() => { codigoBuffer = ''; pintarPuntos(); }, 450);
+}
+function bloquearTeclado(b) {
+  [...teclado.children].forEach((x) => { if (!x.classList.contains('vacio')) x.disabled = b; });
+}
+
+// ========================================================================
+//  2 · CONFIRMACIÓN
+// ========================================================================
+function mostrarConfirmacion(fichaje) {
+  const conf = $('confirmacion');
+  const esEntrada = fichaje.tipo === 'entrada';
+  conf.className = 'confirmacion ' + fichaje.tipo;
+  conf.querySelector('.circulo').innerHTML = esEntrada
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  $('conf-tipo').textContent = esEntrada ? 'Entrada registrada' : 'Salida registrada';
+  $('conf-hora').textContent = fmtHora(fichaje.momento);
+  $('conf-quien').textContent = fichaje.nombre || (sesion && sesion.nombre) || '';
+  mostrar('vista-confirmacion');
+}
+$('btn-hecho').addEventListener('click', () => salir());
+$('btn-ver-mis').addEventListener('click', () => abrirMisFichajes());
+
+// ========================================================================
+//  3 · MIS FICHAJES
+// ========================================================================
+let rangoActual = 'hoy';
+
+function abrirMisFichajes() {
+  $('fichajes-titulo').textContent = sesion ? sesion.nombre : 'Mis fichajes';
+  mostrar('vista-fichajes');
+  cargarFichajes();
+}
+
+$('rango').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  [...$('rango').children].forEach((x) => x.classList.toggle('activo', x === b));
+  rangoActual = b.dataset.rango;
+  cargarFichajes();
+});
+$('btn-fichar-ahora').addEventListener('click', () => ficharDesdeSesion());
+$('btn-salir').addEventListener('click', () => salir());
+
+function rangoFechas(r) {
+  const hoy = new Date();
+  const fin = claveDia(hoy.toISOString());
+  const d = new Date(hoy);
+  if (r === 'hoy') return [fin, fin];
+  if (r === 'semana') {
+    const dow = (d.getDay() + 6) % 7;           // lunes = 0
+    d.setDate(d.getDate() - dow);
+    return [claveDia(d.toISOString()), fin];
+  }
+  if (r === 'mes') {
+    d.setDate(1);
+    return [claveDia(d.toISOString()), fin];
+  }
+  return ['2000-01-01', fin];                    // todo
+}
+
+async function cargarFichajes() {
+  const cont = $('lista-fichajes');
+  cont.className = 'cargando';
+  cont.textContent = 'Cargando…';
+  $('total-periodo').innerHTML = '';
+
+  const [desde, hasta] = rangoFechas(rangoActual);
+  const [fRes, hRes] = await Promise.all([
+    supabase.rpc('fichaje_mis_fichajes_codigo', { p_codigo: sesion.codigo, p_desde: desde, p_hasta: hasta }),
+    supabase.rpc('fichaje_mi_horario_codigo', { p_codigo: sesion.codigo }),
+  ]);
+
+  if (fRes.error) {
+    cont.className = 'aviso';
+    cont.textContent = 'No se pudieron cargar los fichajes.';
+    return;
+  }
+  const horario = hRes.error ? null : hRes.data;
+  pintarFichajes(fRes.data || [], horario);
+}
+
+// Agrupa por día y empareja entrada→salida en orden.
+function agruparPorDia(fichajes) {
+  const dias = {};
+  for (const f of fichajes) {
+    const k = claveDia(f.momento);
+    (dias[k] = dias[k] || []).push(f);
+  }
+  return Object.entries(dias).sort((a, b) => b[0].localeCompare(a[0])).map(([dia, marcas]) => {
+    marcas.sort((a, b) => a.momento.localeCompare(b.momento));
+    let trabajado = 0, abierta = false, ini = null;
+    for (const m of marcas) {
+      if (m.tipo === 'entrada') { ini = new Date(m.momento); }
+      else if (m.tipo === 'salida' && ini) { trabajado += (new Date(m.momento) - ini) / 60000; ini = null; }
+    }
+    if (ini) abierta = true;
+    return { dia, marcas, trabajado, abierta };
+  });
+}
+
+// Minutos teóricos de un día según el horario de referencia.
+function minutosTeoricos(clave, horario) {
+  if (!horario || !Array.isArray(horario.tramos)) return null;
+  const dow = ((new Date(`${clave}T12:00:00`).getDay()) + 6) % 7 + 1;   // 1=L … 7=D
+  if (Array.isArray(horario.dias) && !horario.dias.includes(dow)) return 0;
+  return horario.tramos.reduce((s, t) => {
+    const [eh, em] = t.entrada.split(':').map(Number);
+    const [sh, sm] = t.salida.split(':').map(Number);
+    return s + (sh * 60 + sm) - (eh * 60 + em);
+  }, 0);
+}
+
+function pintarFichajes(fichajes, horario) {
+  const cont = $('lista-fichajes');
+  if (!fichajes.length) {
+    cont.className = 'vacio';
+    cont.textContent = 'Sin fichajes en este periodo.';
+    return;
+  }
+  const grupos = agruparPorDia(fichajes);
+  const soloUnDia = rangoActual === 'hoy' || grupos.length === 1;
+  let totalTrab = 0, totalTeo = 0, hayTeo = false;
+
+  cont.className = '';
+  cont.innerHTML = grupos.map((g) => {
+    totalTrab += g.trabajado;
+    const teo = minutosTeoricos(g.dia, horario);
+    let difHtml = '';
+    if (teo != null && teo > 0) {
+      hayTeo = true; totalTeo += teo;
+      const dif = g.trabajado - teo;
+      const cls = dif >= 0 ? 'dif-pos' : 'dif-neg';
+      difHtml = `<span class="dia-dif ${cls}">${dif >= 0 ? '+' : ''}${fmtHM(dif)}</span>`;
+    }
+    const pills = g.marcas.map((m) => {
+      const abierta = m.tipo === 'entrada' && g.abierta && m === g.marcas[g.marcas.length - 1];
+      return `<span class="marca-pill ${m.tipo === 'entrada' ? 'e' : 's'} ${abierta ? 'abierta' : ''}">${m.tipo === 'entrada' ? '▸' : '◂'} ${fmtHora(m.momento)}${m.editado ? ' ·✎' : ''}</span>`;
+    }).join('');
+    const cabecera = soloUnDia ? '' : `
+        <div class="dia-cab">
+          <span class="dia-fecha">${diaLegible(g.dia)}</span>
+          <span><span class="dia-horas">${fmtHM(g.trabajado)}</span>${difHtml}</span>
+        </div>`;
+    return `
+      <div class="dia">
+        ${cabecera}
+        <div class="marcas">${pills}</div>
+        ${g.abierta ? '<div class="aviso" style="margin-top:8px;">Jornada sin cerrar (falta una salida).</div>' : ''}
+      </div>`;
+  }).join('');
+
+  const etiqueta = { hoy: 'Hoy', semana: 'Esta semana', mes: 'Este mes', todo: 'Total' }[rangoActual];
+  let extra = '';
+  if (hayTeo) {
+    const dif = totalTrab - totalTeo;
+    extra = ` <span class="dia-dif ${dif >= 0 ? 'dif-pos' : 'dif-neg'}">${dif >= 0 ? '+' : ''}${fmtHM(dif)}</span>`;
+  }
+  $('total-periodo').innerHTML =
+    `<div class="total-periodo"><span>${etiqueta}</span><span class="n">${fmtHM(totalTrab)}${extra}</span></div>`;
+}
+
+async function ficharDesdeSesion() {
+  $('btn-fichar-ahora').disabled = true;
+  const { data, error } = await supabase.rpc('fichaje_marcar_codigo', { p_codigo: sesion.codigo, p_origen: 'web' });
+  $('btn-fichar-ahora').disabled = false;
+  if (error) { alert('No se pudo fichar. Vuelve a introducir tu código.'); return; }
+  mostrarConfirmacion(data);
+}
+
+// ========================================================================
+//  4 · SOLICITAR CAMBIO DE HORARIO
+// ========================================================================
+let tramosBorrador = [];
+let diasBorrador = [];
+
+$('btn-solicitar').addEventListener('click', async () => {
+  const { data } = await supabase.rpc('fichaje_mi_horario_codigo', { p_codigo: sesion.codigo });
+  tramosBorrador = (data && Array.isArray(data.tramos) && data.tramos.length)
+    ? data.tramos.map((t) => ({ ...t }))
+    : [{ entrada: '08:00', salida: '14:00' }];
+  diasBorrador = (data && Array.isArray(data.dias) && data.dias.length) ? [...data.dias] : [1, 2, 3, 4, 5];
+  $('solicitud-mensaje').value = '';
+  $('solicitud-ok').hidden = true;
+  $('solicitud-error').hidden = true;
+  pintarEditorTramos();
+  pintarDiasSemana();
+  mostrar('vista-solicitud');
+});
+
+$('btn-cancelar-solicitud').addEventListener('click', () => abrirMisFichajes());
+
+$('btn-add-tramo').addEventListener('click', () => {
+  tramosBorrador.push({ entrada: '16:00', salida: '18:00' });
+  pintarEditorTramos();
+});
+
+function pintarEditorTramos() {
+  const cont = $('editor-tramos');
+  cont.innerHTML = '';
+  tramosBorrador.forEach((t, i) => {
+    const fila = document.createElement('div');
+    fila.className = 'tramo-fila';
+    fila.innerHTML = `
+      <input type="time" value="${t.entrada}" data-i="${i}" data-k="entrada">
+      <span style="color:var(--texto-terciario)">→</span>
+      <input type="time" value="${t.salida}" data-i="${i}" data-k="salida">
+      <button class="quitar" data-quitar="${i}" ${tramosBorrador.length === 1 ? 'disabled' : ''}>✕</button>`;
+    cont.appendChild(fila);
+  });
+  cont.querySelectorAll('input[type=time]').forEach((inp) => {
+    inp.addEventListener('change', () => { tramosBorrador[inp.dataset.i][inp.dataset.k] = inp.value; });
+  });
+  cont.querySelectorAll('[data-quitar]').forEach((b) => {
+    b.addEventListener('click', () => { tramosBorrador.splice(+b.dataset.quitar, 1); pintarEditorTramos(); });
+  });
+}
+
+function pintarDiasSemana() {
+  const cont = $('dias-semana');
+  cont.innerHTML = '';
+  for (let d = 1; d <= 7; d++) {
+    const b = document.createElement('button');
+    b.textContent = DIAS_CORTOS[d];
+    b.classList.toggle('activo', diasBorrador.includes(d));
+    b.addEventListener('click', () => {
+      if (diasBorrador.includes(d)) diasBorrador = diasBorrador.filter((x) => x !== d);
+      else diasBorrador.push(d);
+      diasBorrador.sort();
+      pintarDiasSemana();
+    });
+    cont.appendChild(b);
+  }
+}
+
+$('btn-enviar-solicitud').addEventListener('click', async () => {
+  $('solicitud-error').hidden = true;
+  if (!diasBorrador.length) {
+    $('solicitud-error').textContent = 'Marca al menos un día de trabajo.';
+    $('solicitud-error').hidden = false;
+    return;
+  }
+  for (const t of tramosBorrador) {
+    if (!t.entrada || !t.salida || t.salida <= t.entrada) {
+      $('solicitud-error').textContent = 'Revisa los tramos: la salida debe ser posterior a la entrada.';
+      $('solicitud-error').hidden = false;
+      return;
+    }
+  }
+  $('btn-enviar-solicitud').disabled = true;
+  const { error } = await supabase.rpc('fichaje_solicitar_cambio_codigo', {
+    p_codigo: sesion.codigo,
+    p_tramos: tramosBorrador, p_dias: diasBorrador,
+    p_mensaje: $('solicitud-mensaje').value.trim() || null,
+  });
+  $('btn-enviar-solicitud').disabled = false;
+  if (error) {
+    $('solicitud-error').textContent = 'No se pudo enviar la solicitud.';
+    $('solicitud-error').hidden = false;
+    return;
+  }
+  $('solicitud-ok').hidden = false;
+  setTimeout(() => abrirMisFichajes(), 1600);
+});
+
+// ========================================================================
+//  ARRANQUE
+// ========================================================================
+if (sesion && sesion.codigo) {
+  abrirMisFichajes();
+} else {
+  reiniciarLogin();
+  mostrar('vista-login');
+}
+</script>
+</body>
+</html>

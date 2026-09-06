@@ -261,6 +261,90 @@
   .avisos li .cliente { font-weight: 500; }
   .avisos li .valor { color: var(--naranja); font-weight: 600; }
 
+  /* --- Fichajes (gestión) --- */
+  .sub-nav { display: flex; gap: 6px; margin-bottom: 18px; background: var(--bg); border: 1px solid var(--borde); border-radius: 11px; padding: 4px; max-width: 420px; }
+  .sub-nav button {
+    flex: 1; background: none; color: var(--texto-secundario); border: none; border-radius: 8px;
+    padding: 8px 6px; font-size: 0.82rem; font-weight: 600; position: relative;
+  }
+  .sub-nav button.activa { background: var(--superficie); color: var(--texto); box-shadow: var(--sombra); }
+  .sub-nav .contador {
+    display: inline-flex; min-width: 17px; height: 17px; padding: 0 4px; margin-left: 5px;
+    align-items: center; justify-content: center; border-radius: 999px;
+    background: var(--rojo); color: #fff; font-size: 0.66rem; font-weight: 700;
+  }
+  .sub-vista { display: none; }
+  .sub-vista.activa { display: block; }
+
+  .barra-filtros { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 16px; }
+  .campo { display: flex; flex-direction: column; gap: 4px; }
+  .campo label { font-size: 0.72rem; font-weight: 600; color: var(--texto-terciario); text-transform: uppercase; letter-spacing: 0.04em; margin: 0; }
+  .campo input, .campo select {
+    background: var(--bg); border: 1px solid var(--borde); color: var(--texto);
+    border-radius: 8px; padding: 8px 10px; font: inherit; font-size: 0.86rem;
+  }
+  .btn-sm { padding: 8px 14px; font-size: 0.82rem; border-radius: 9px; width: auto; }
+  .btn-sm.secundario { background: var(--superficie); color: var(--texto-secundario); border: 1px solid var(--borde); }
+  .btn-fila { padding: 5px 10px; font-size: 0.76rem; border-radius: 7px; width: auto; background: var(--superficie); color: var(--texto-secundario); border: 1px solid var(--borde); font-weight: 600; }
+  .btn-fila:hover { color: var(--texto); }
+  .btn-fila.peligro { color: var(--rojo); border-color: var(--rojo-suave); }
+  .btn-fila.principal { background: var(--acento); color: #fff; border-color: var(--acento); }
+
+  .marca-edit {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 0.8rem;
+    padding: 3px 8px; border-radius: 7px; border: 1px solid var(--borde); background: var(--bg);
+    cursor: pointer; margin: 2px 4px 2px 0; white-space: nowrap;
+  }
+  .marca-edit.e { color: var(--verde); }
+  .marca-edit.s { color: var(--acento); }
+  .marca-edit.editado::after { content: '✎'; font-size: 0.7rem; opacity: 0.6; }
+
+  .panel-form {
+    background: var(--bg); border: 1px solid var(--borde); border-radius: var(--radio);
+    padding: 16px; margin-bottom: 16px; display: grid; gap: 12px;
+  }
+  .panel-form .fila { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+  .panel-form .acciones { display: flex; gap: 8px; }
+  .dias-chips { display: flex; gap: 5px; }
+  .dias-chips button {
+    width: 34px; padding: 7px 0; background: var(--superficie); border: 1px solid var(--borde);
+    color: var(--texto-secundario); border-radius: 8px; font-size: 0.78rem; font-weight: 700;
+  }
+  .dias-chips button.activo { background: var(--acento); color: #fff; border-color: var(--acento); }
+  .tramo-fila-p { display: flex; gap: 8px; align-items: center; }
+  .tramo-fila-p input { width: 110px; }
+
+  .sol-tarjeta { border: 1px solid var(--borde); border-radius: var(--radio); padding: 16px; margin-bottom: 12px; background: var(--superficie); }
+  .sol-tarjeta .cab { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .sol-tarjeta .nombre { font-weight: 700; }
+  .sol-tarjeta .fecha { color: var(--texto-terciario); font-size: 0.76rem; }
+  .sol-tarjeta .propuesta { font-size: 0.86rem; color: var(--texto-secundario); margin-bottom: 6px; }
+  .sol-tarjeta .mensaje { font-size: 0.84rem; font-style: italic; color: var(--texto-secundario); margin-bottom: 12px; }
+  .sol-tarjeta .acciones { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge.rechazada { background: var(--rojo-suave); color: var(--rojo); }
+  .badge.aceptada, .badge.modificada { background: var(--verde-suave); color: var(--verde); }
+
+  /* --- Modal genérico de gestión --- */
+  .modal-fondo {
+    position: fixed; inset: 0; background: rgba(10,12,16,0.55); z-index: 100;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal {
+    background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio);
+    box-shadow: var(--sombra); width: 100%; max-width: 420px; padding: 22px;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal h3 { margin: 0 0 16px; font-size: 1rem; }
+  .modal label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--texto-terciario); text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 5px; }
+  .modal input, .modal select, .modal textarea {
+    width: 100%; background: var(--bg); border: 1px solid var(--borde); color: var(--texto);
+    border-radius: 8px; padding: 10px 12px; font: inherit; font-size: 0.9rem;
+  }
+  .modal .acciones { display: flex; gap: 8px; margin-top: 20px; }
+  .modal .acciones button { flex: 1; }
+  .modal-error { color: var(--rojo); background: var(--rojo-suave); border-radius: 8px; font-size: 0.8rem; padding: 0; max-height: 0; overflow: hidden; transition: all 0.15s; }
+  .modal-error:not(:empty) { padding: 8px 10px; max-height: 80px; margin-top: 12px; }
+
   @media (max-width: 640px) {
     header.top .sub { display: none; }
     .contenedor { padding: 0 14px 60px; }
@@ -314,6 +398,7 @@
       <button data-vista="ubicaciones">Ubicaciones</button>
       <button data-vista="notas">Notas</button>
       <button data-vista="ventas">Ventas</button>
+      <button data-vista="fichajes">Fichajes</button>
     </nav>
   </div>
 
@@ -388,6 +473,64 @@
         </div>
       </div>
       <div class="tarjeta-scroll" id="ventas-contenido"><div class="vacio">Cargando…</div></div>
+    </div>
+  </section>
+
+  <section class="vista" data-vista="fichajes" id="fichajes">
+    <div class="sub-nav" id="fichajes-subnav">
+      <button data-sub="registro" class="activa">Registro</button>
+      <button data-sub="empleados">Empleados</button>
+      <button data-sub="solicitudes">Solicitudes<span class="contador" id="sol-contador" style="display:none">0</span></button>
+    </div>
+
+    <!-- Registro de fichajes -->
+    <div class="sub-vista activa" data-sub="registro">
+      <div class="tarjeta">
+        <div class="tarjeta-cabecera">
+          <h2><span class="icono-titulo"><svg viewBox="0 0 24 24" class="icono"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span> Registro de fichajes</h2>
+        </div>
+        <div class="barra-filtros" style="margin-top:14px;">
+          <div class="campo">
+            <label>Empleado</label>
+            <select id="reg-empleado"><option value="">Todos</option></select>
+          </div>
+          <div class="campo">
+            <label>Desde</label>
+            <input type="date" id="reg-desde">
+          </div>
+          <div class="campo">
+            <label>Hasta</label>
+            <input type="date" id="reg-hasta">
+          </div>
+          <button class="btn-sm" id="reg-aplicar">Aplicar</button>
+          <button class="btn-sm secundario" id="reg-csv">Exportar CSV</button>
+          <button class="btn-sm secundario" id="reg-nuevo">+ Fichaje manual</button>
+        </div>
+        <div id="reg-form-slot"></div>
+        <div class="tarjeta-scroll" id="reg-contenido"><div class="vacio">Elige un rango y pulsa Aplicar.</div></div>
+      </div>
+    </div>
+
+    <!-- Empleados -->
+    <div class="sub-vista" data-sub="empleados">
+      <div class="tarjeta">
+        <div class="tarjeta-cabecera">
+          <h2><span class="icono-titulo"><svg viewBox="0 0 24 24" class="icono"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Empleados</h2>
+          <button class="btn-sm" id="emp-nuevo">+ Nuevo empleado</button>
+        </div>
+        <div id="emp-form-slot"></div>
+        <div class="tarjeta-scroll" id="emp-contenido"><div class="vacio">Cargando…</div></div>
+      </div>
+    </div>
+
+    <!-- Solicitudes -->
+    <div class="sub-vista" data-sub="solicitudes">
+      <div class="tarjeta">
+        <div class="tarjeta-cabecera">
+          <h2><span class="icono-titulo"><svg viewBox="0 0 24 24" class="icono"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg></span> Solicitudes de cambio de horario</h2>
+        </div>
+        <div id="sol-contenido" style="margin-top:12px;"><div class="vacio">Cargando…</div></div>
+      </div>
     </div>
   </section>
 </div>
@@ -805,6 +948,535 @@ function activarFilasExpandibles(contenido) {
     });
   });
 }
+
+// ======================================================================
+//  FICHAJES · gestión (empleados, registro de fichajes, horarios, solicitudes)
+// ======================================================================
+
+let fichajesInit = false;       // la pestaña se inicializa la primera vez que se abre
+let fEmpleados = [];            // caché de empleados
+let fHorarios = {};             // empleado_id -> horario de referencia vigente
+let ultimoRegistro = [];        // últimos fichajes cargados (para exportar CSV)
+
+const ROLES = { almacen: 'Almacén', chofer: 'Chófer', encargado: 'Encargado', jefe: 'Jefe' };
+const DIAS_L = ['', 'L', 'M', 'X', 'J', 'V', 'S', 'D'];
+const rolLegible = (r) => ROLES[r] || r;
+const horaLocal = (iso) => new Date(iso).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+const escapar = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/// "480" min -> "8:00". Mantiene el signo para diferencias negativas.
+function fmtHM(min) {
+  const s = min < 0 ? '-' : '';
+  min = Math.abs(Math.round(min));
+  return `${s}${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}`;
+}
+
+/// Agrupa una lista de fichajes por día (clave local) y empareja entrada→salida
+/// en orden para calcular los minutos trabajados. `abierta` = falta una salida.
+function agruparDias(fichajes) {
+  const dias = {};
+  for (const f of fichajes) (dias[diaKey(f.momento)] = dias[diaKey(f.momento)] || []).push(f);
+  return Object.entries(dias).sort((a, b) => a[0].localeCompare(b[0])).map(([dia, marcas]) => {
+    marcas.sort((a, b) => a.momento.localeCompare(b.momento));
+    let trabajado = 0, ini = null, abierta = false;
+    for (const m of marcas) {
+      if (m.tipo === 'entrada') ini = new Date(m.momento);
+      else if (m.tipo === 'salida' && ini) { trabajado += (new Date(m.momento) - ini) / 60000; ini = null; }
+    }
+    if (ini) abierta = true;
+    return { dia, marcas, trabajado, abierta };
+  });
+}
+
+/// Minutos teóricos de un día según el horario de referencia (null si no hay
+/// horario; 0 si ese día de la semana no se trabaja).
+function minTeoricos(clave, horario) {
+  if (!horario || !Array.isArray(horario.tramos)) return null;
+  const dow = ((new Date(`${clave}T12:00:00`).getDay()) + 6) % 7 + 1;
+  if (Array.isArray(horario.dias) && !horario.dias.includes(dow)) return 0;
+  return horario.tramos.reduce((s, t) => {
+    const [eh, em] = t.entrada.split(':').map(Number);
+    const [sh, sm] = t.salida.split(':').map(Number);
+    return s + (sh * 60 + sm) - (eh * 60 + em);
+  }, 0);
+}
+
+function difHTML(min) {
+  return `<span class="balance ${min >= 0 ? 'positivo' : 'negativo'}">${min >= 0 ? '+' : ''}${fmtHM(min)}</span>`;
+}
+
+// --- Modal genérico ---------------------------------------------------------
+
+/// Crea un modal con cuerpo HTML y botones Cancelar / Guardar.
+/// `onGuardar(fondo, cerrar)` puede lanzar un Error: su mensaje se muestra.
+function abrirModal(titulo, cuerpoHTML, onGuardar, textoGuardar = 'Guardar') {
+  const fondo = document.createElement('div');
+  fondo.className = 'modal-fondo';
+  fondo.innerHTML = `<div class="modal"><h3>${escapar(titulo)}</h3>${cuerpoHTML}
+    <div class="modal-error" id="modal-error"></div>
+    <div class="acciones">
+      <button class="secundario" id="modal-cancelar">Cancelar</button>
+      <button id="modal-guardar">${escapar(textoGuardar)}</button>
+    </div></div>`;
+  document.body.appendChild(fondo);
+  const cerrar = () => fondo.remove();
+  fondo.addEventListener('click', (e) => { if (e.target === fondo) cerrar(); });
+  fondo.querySelector('#modal-cancelar').addEventListener('click', cerrar);
+  fondo.querySelector('#modal-guardar').addEventListener('click', async () => {
+    const btn = fondo.querySelector('#modal-guardar');
+    btn.disabled = true;
+    fondo.querySelector('#modal-error').textContent = '';
+    try {
+      await onGuardar(fondo, cerrar);
+    } catch (err) {
+      fondo.querySelector('#modal-error').textContent = err.message || 'No se pudo guardar';
+      btn.disabled = false;
+    }
+  });
+  return fondo;
+}
+
+const emailAdmin = async () => (await supabase.auth.getUser()).data.user?.email || 'panel';
+
+// --- Carga inicial de la pestaña ------------------------------------------
+
+function initFichajes() {
+  if (fichajesInit) return;
+  fichajesInit = true;
+
+  const hoy = new Date();
+  const lunes = new Date(hoy);
+  lunes.setDate(hoy.getDate() - ((hoy.getDay() + 6) % 7));
+  document.getElementById('reg-desde').value = diaKey(lunes.toISOString());
+  document.getElementById('reg-hasta').value = diaKey(hoy.toISOString());
+
+  document.getElementById('fichajes-subnav').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-sub]');
+    if (!b) return;
+    document.querySelectorAll('#fichajes-subnav button').forEach((x) => x.classList.toggle('activa', x === b));
+    document.querySelectorAll('#fichajes .sub-vista').forEach((v) => v.classList.toggle('activa', v.dataset.sub === b.dataset.sub));
+  });
+
+  document.getElementById('reg-aplicar').addEventListener('click', cargarRegistro);
+  document.getElementById('reg-csv').addEventListener('click', exportarCSVFichajes);
+  document.getElementById('reg-nuevo').addEventListener('click', modalFichajeManual);
+  document.getElementById('emp-nuevo').addEventListener('click', () => modalEmpleado(null));
+
+  cargarEmpleadosFichaje().then(() => { cargarRegistro(); cargarSolicitudes(); });
+}
+
+async function cargarEmpleadosFichaje() {
+  const [{ data: emps, error }, { data: hs }] = await Promise.all([
+    supabase.from('fichaje_empleados').select('*').order('nombre'),
+    supabase.from('fichaje_horarios').select('*').is('vigente_hasta', null),
+  ]);
+  if (error) { mostrarToast('Error al cargar empleados'); return; }
+  fEmpleados = emps || [];
+  fHorarios = Object.fromEntries((hs || []).map((h) => [h.empleado_id, h]));
+
+  const sel = document.getElementById('reg-empleado');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">Todos</option>' +
+    fEmpleados.map((e) => `<option value="${e.id}">${escapar(e.nombre)}</option>`).join('');
+  sel.value = prev;
+  pintarEmpleados();
+}
+
+// --- Empleados -----------------------------------------------------------
+
+function pintarEmpleados() {
+  const cont = document.getElementById('emp-contenido');
+  if (!fEmpleados.length) {
+    cont.innerHTML = '<div class="vacio">Sin empleados todavía. Añade el primero.</div>';
+    return;
+  }
+  cont.innerHTML = `<table>
+    <thead><tr><th>Nombre</th><th>Código</th><th>Rol</th><th>Estado</th><th>Horario</th><th></th></tr></thead>
+    <tbody>${fEmpleados.map((e) => {
+      const h = fHorarios[e.id];
+      const htxt = h && Array.isArray(h.tramos) && h.tramos.length
+        ? h.tramos.map((t) => `${t.entrada}–${t.salida}`).join(' · ')
+        : '—';
+      return `<tr>
+        <td>${escapar(e.nombre)}</td>
+        <td style="font-variant-numeric:tabular-nums">${escapar(e.codigo) || '—'}</td>
+        <td>${rolLegible(e.rol)}</td>
+        <td>${e.activo ? '<span class="badge saldada">Activo</span>' : '<span class="badge rechazada">Baja</span>'}</td>
+        <td style="font-size:0.8rem;color:var(--texto-secundario)">${htxt}</td>
+        <td style="text-align:right;white-space:nowrap">
+          <button class="btn-fila" data-editar="${e.id}">Editar</button>
+          <button class="btn-fila" data-horario="${e.id}">Horario</button>
+        </td></tr>`;
+    }).join('')}</tbody></table>`;
+  cont.querySelectorAll('[data-editar]').forEach((b) =>
+    b.addEventListener('click', () => modalEmpleado(fEmpleados.find((e) => e.id === b.dataset.editar))));
+  cont.querySelectorAll('[data-horario]').forEach((b) =>
+    b.addEventListener('click', () => modalHorario(fEmpleados.find((e) => e.id === b.dataset.horario))));
+}
+
+function modalEmpleado(emp) {
+  const fondo = abrirModal(emp ? 'Editar empleado' : 'Nuevo empleado', `
+    <label>Nombre</label>
+    <input id="m-nombre" value="${emp ? escapar(emp.nombre) : ''}">
+    <label>Código (4 dígitos)</label>
+    <input id="m-codigo" inputmode="numeric" maxlength="4" value="${emp ? escapar(emp.codigo || '') : ''}">
+    <label>Rol</label>
+    <select id="m-rol">${Object.entries(ROLES).map(([k, v]) =>
+      `<option value="${k}" ${emp && emp.rol === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
+    <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;margin-top:14px">
+      <input type="checkbox" id="m-activo" style="width:auto" ${!emp || emp.activo ? 'checked' : ''}> Activo
+    </label>
+    ${emp ? '<button class="btn-fila peligro" id="m-borrar" style="margin-top:16px">Eliminar empleado</button>' : ''}
+  `, async (f, cerrar) => {
+    const nombre = f.querySelector('#m-nombre').value.trim();
+    const codigo = f.querySelector('#m-codigo').value.trim();
+    if (!nombre) throw new Error('El nombre es obligatorio');
+    if (!/^[0-9]{4}$/.test(codigo)) throw new Error('El código debe tener 4 dígitos numéricos');
+    const { error } = await supabase.rpc('fichaje_admin_guardar_empleado', {
+      p_id: emp ? emp.id : null,
+      p_nombre: nombre,
+      p_codigo: codigo,
+      p_activo: f.querySelector('#m-activo').checked,
+      p_rol: f.querySelector('#m-rol').value,
+    });
+    if (error) throw new Error(error.message);
+    cerrar();
+    await cargarEmpleadosFichaje();
+    mostrarToast('Empleado guardado');
+  });
+
+  const borrar = fondo.querySelector('#m-borrar');
+  if (borrar) borrar.addEventListener('click', async () => {
+    if (!confirm(`¿Eliminar a ${emp.nombre}? Se borrarán también sus fichajes.`)) return;
+    const { error } = await supabase.from('fichaje_empleados').delete().eq('id', emp.id);
+    if (error) { mostrarToast('No se pudo eliminar'); return; }
+    fondo.remove();
+    await cargarEmpleadosFichaje();
+    cargarRegistro();
+    mostrarToast('Empleado eliminado');
+  });
+}
+
+// --- Editor de horario (tramos + días), reutilizable -----------------------
+
+/// Monta el editor de tramos/días dentro de `fondo` (espera #eh-tramos,
+/// #eh-add y #eh-dias en el cuerpo). Devuelve un objeto { tramos, dias } vivo.
+function montarEditorHorario(fondo, tramosIniciales, diasIniciales) {
+  const estado = {
+    tramos: (tramosIniciales && tramosIniciales.length) ? tramosIniciales.map((t) => ({ ...t })) : [{ entrada: '08:00', salida: '14:00' }],
+    dias: (diasIniciales && diasIniciales.length) ? [...diasIniciales] : [1, 2, 3, 4, 5],
+  };
+  const pintar = () => {
+    const c = fondo.querySelector('#eh-tramos');
+    c.innerHTML = estado.tramos.map((t, i) => `
+      <div class="tramo-fila-p" style="margin-bottom:6px">
+        <input type="time" value="${t.entrada}" data-i="${i}" data-k="entrada">
+        <span style="color:var(--texto-terciario)">→</span>
+        <input type="time" value="${t.salida}" data-i="${i}" data-k="salida">
+        <button class="btn-fila peligro" data-q="${i}" ${estado.tramos.length === 1 ? 'disabled' : ''}>✕</button>
+      </div>`).join('');
+    c.querySelectorAll('input').forEach((inp) =>
+      inp.addEventListener('change', () => { estado.tramos[inp.dataset.i][inp.dataset.k] = inp.value; }));
+    c.querySelectorAll('[data-q]').forEach((b) =>
+      b.addEventListener('click', () => { estado.tramos.splice(+b.dataset.q, 1); pintar(); }));
+
+    const d = fondo.querySelector('#eh-dias');
+    d.innerHTML = [1, 2, 3, 4, 5, 6, 7].map((n) =>
+      `<button data-d="${n}" class="${estado.dias.includes(n) ? 'activo' : ''}">${DIAS_L[n]}</button>`).join('');
+    d.querySelectorAll('[data-d]').forEach((b) => b.addEventListener('click', () => {
+      const n = +b.dataset.d;
+      estado.dias = estado.dias.includes(n) ? estado.dias.filter((x) => x !== n) : [...estado.dias, n].sort();
+      pintar();
+    }));
+  };
+  fondo.querySelector('#eh-add').addEventListener('click', () => {
+    estado.tramos.push({ entrada: '16:00', salida: '18:00' });
+    pintar();
+  });
+  pintar();
+  return estado;
+}
+
+function validarHorario(estado) {
+  for (const t of estado.tramos) {
+    if (!t.entrada || !t.salida || t.salida <= t.entrada) throw new Error('Revisa los tramos: la salida debe ser posterior a la entrada');
+  }
+  if (!estado.dias.length) throw new Error('Marca al menos un día de trabajo');
+}
+
+function modalHorario(emp) {
+  const h = fHorarios[emp.id];
+  const fondo = abrirModal(`Horario de ${emp.nombre}`, `
+    <label>Tramos de la jornada</label>
+    <div id="eh-tramos"></div>
+    <button class="btn-fila" id="eh-add" style="margin-top:6px">+ Añadir tramo</button>
+    <label style="margin-top:16px">Días de trabajo</label>
+    <div class="dias-chips" id="eh-dias"></div>
+  `, async (f, cerrar) => {
+    validarHorario(estado);
+    if (h) {
+      const { error: e1 } = await supabase.from('fichaje_horarios')
+        .update({ vigente_hasta: diaKey(new Date().toISOString()) }).eq('id', h.id);
+      if (e1) throw new Error(e1.message);
+    }
+    const { error } = await supabase.from('fichaje_horarios').insert({
+      empleado_id: emp.id, tramos: estado.tramos, dias: estado.dias, definido_por: await emailAdmin(),
+    });
+    if (error) throw new Error(error.message);
+    cerrar();
+    await cargarEmpleadosFichaje();
+    cargarRegistro();
+    mostrarToast('Horario actualizado');
+  });
+  const estado = montarEditorHorario(fondo, h && h.tramos, h && h.dias);
+}
+
+// --- Registro de fichajes ------------------------------------------------
+
+async function cargarRegistro() {
+  const cont = document.getElementById('reg-contenido');
+  const desde = document.getElementById('reg-desde').value;
+  const hasta = document.getElementById('reg-hasta').value;
+  if (!desde || !hasta) { cont.innerHTML = '<div class="vacio">Indica el rango de fechas.</div>'; return; }
+  cont.innerHTML = '<div class="vacio">Cargando…</div>';
+
+  let q = supabase.from('fichajes').select('*')
+    .gte('momento', `${desde}T00:00:00`)
+    .lte('momento', `${hasta}T23:59:59`)
+    .order('momento');
+  const empId = document.getElementById('reg-empleado').value;
+  if (empId) q = q.eq('empleado_id', empId);
+
+  const { data, error } = await q;
+  if (error) { cont.innerHTML = `<div class="vacio">Error: ${error.message}</div>`; return; }
+  ultimoRegistro = data || [];
+  pintarRegistro(ultimoRegistro);
+}
+
+function pintarRegistro(fichajes) {
+  const cont = document.getElementById('reg-contenido');
+  if (!fichajes.length) { cont.innerHTML = '<div class="vacio">Sin fichajes en este rango.</div>'; return; }
+
+  const porEmp = {};
+  for (const f of fichajes) (porEmp[f.empleado_id] = porEmp[f.empleado_id] || []).push(f);
+
+  cont.innerHTML = Object.entries(porEmp).map(([eid, fs]) => {
+    const emp = fEmpleados.find((e) => e.id === eid) || { nombre: '—' };
+    const horario = fHorarios[eid];
+    let totTrab = 0, totTeo = 0, hayTeo = false;
+
+    const filas = agruparDias(fs).map((g) => {
+      totTrab += g.trabajado;
+      const teo = minTeoricos(g.dia, horario);
+      let difCel = '—';
+      if (teo != null && teo > 0) { hayTeo = true; totTeo += teo; difCel = difHTML(g.trabajado - teo); }
+      const marcas = g.marcas.map((m) =>
+        `<span class="marca-edit ${m.tipo === 'entrada' ? 'e' : 's'} ${m.editado ? 'editado' : ''}" data-fid="${m.id}">${m.tipo === 'entrada' ? '▸' : '◂'} ${horaLocal(m.momento)}</span>`).join('');
+      return `<tr>
+        <td style="text-transform:capitalize">${diaLegible(g.dia)}</td>
+        <td>${marcas}${g.abierta ? ' <span class="badge alto">sin cerrar</span>' : ''}</td>
+        <td class="num">${fmtHM(g.trabajado)}</td>
+        <td class="num">${teo != null && teo > 0 ? fmtHM(teo) : '—'}</td>
+        <td class="num">${difCel}</td></tr>`;
+    }).join('');
+
+    return `<div style="margin-bottom:22px">
+      <div style="font-weight:700;margin:4px 0 8px">${escapar(emp.nombre)}</div>
+      <table>
+        <thead><tr><th>Día</th><th>Fichajes</th><th class="num">Trabajado</th><th class="num">Teórico</th><th class="num">Dif.</th></tr></thead>
+        <tbody>${filas}</tbody>
+        <tfoot><tr>
+          <td colspan="2" style="font-weight:700">Total</td>
+          <td class="num" style="font-weight:700">${fmtHM(totTrab)}</td>
+          <td class="num">${hayTeo ? fmtHM(totTeo) : '—'}</td>
+          <td class="num">${hayTeo ? difHTML(totTrab - totTeo) : '—'}</td>
+        </tr></tfoot>
+      </table></div>`;
+  }).join('');
+
+  cont.querySelectorAll('[data-fid]').forEach((el) =>
+    el.addEventListener('click', () => modalEditarMarca(fichajes.find((f) => f.id === el.dataset.fid))));
+}
+
+function modalEditarMarca(f) {
+  const d = new Date(f.momento);
+  const horaVal = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  const fondo = abrirModal('Editar fichaje', `
+    <label>Tipo</label>
+    <select id="me-tipo">
+      <option value="entrada" ${f.tipo === 'entrada' ? 'selected' : ''}>Entrada</option>
+      <option value="salida" ${f.tipo === 'salida' ? 'selected' : ''}>Salida</option>
+    </select>
+    <label>Fecha</label><input type="date" id="me-fecha" value="${diaKey(f.momento)}">
+    <label>Hora</label><input type="time" id="me-hora" value="${horaVal}">
+    <button class="btn-fila peligro" id="me-borrar" style="margin-top:16px">Eliminar fichaje</button>
+  `, async (fo, cerrar) => {
+    const nuevo = new Date(`${fo.querySelector('#me-fecha').value}T${fo.querySelector('#me-hora').value}`);
+    if (isNaN(nuevo)) throw new Error('Fecha u hora no válida');
+    const { error } = await supabase.from('fichajes')
+      .update({ momento: nuevo.toISOString(), tipo: fo.querySelector('#me-tipo').value, editado: true })
+      .eq('id', f.id);
+    if (error) throw new Error(error.message);
+    cerrar();
+    cargarRegistro();
+    mostrarToast('Fichaje actualizado');
+  });
+  fondo.querySelector('#me-borrar').addEventListener('click', async () => {
+    if (!confirm('¿Eliminar este fichaje?')) return;
+    const { error } = await supabase.from('fichajes').delete().eq('id', f.id);
+    if (error) { mostrarToast('No se pudo eliminar'); return; }
+    fondo.remove();
+    cargarRegistro();
+    mostrarToast('Fichaje eliminado');
+  });
+}
+
+function modalFichajeManual() {
+  if (!fEmpleados.length) { mostrarToast('Crea antes un empleado'); return; }
+  abrirModal('Fichaje manual', `
+    <label>Empleado</label>
+    <select id="fm-emp">${fEmpleados.map((e) => `<option value="${e.id}">${escapar(e.nombre)}</option>`).join('')}</select>
+    <label>Tipo</label>
+    <select id="fm-tipo"><option value="entrada">Entrada</option><option value="salida">Salida</option></select>
+    <label>Fecha</label><input type="date" id="fm-fecha" value="${diaKey(new Date().toISOString())}">
+    <label>Hora</label><input type="time" id="fm-hora" value="08:00">
+  `, async (fo, cerrar) => {
+    const nuevo = new Date(`${fo.querySelector('#fm-fecha').value}T${fo.querySelector('#fm-hora').value}`);
+    if (isNaN(nuevo)) throw new Error('Fecha u hora no válida');
+    const { error } = await supabase.from('fichajes').insert({
+      empleado_id: fo.querySelector('#fm-emp').value,
+      tipo: fo.querySelector('#fm-tipo').value,
+      momento: nuevo.toISOString(), origen: 'manual', editado: true,
+    });
+    if (error) throw new Error(error.message);
+    cerrar();
+    cargarRegistro();
+    mostrarToast('Fichaje añadido');
+  }, 'Añadir');
+}
+
+function exportarCSVFichajes() {
+  if (!ultimoRegistro.length) { mostrarToast('Nada que exportar'); return; }
+  const filas = [['Empleado', 'Día', 'Fichajes', 'Trabajado', 'Teórico', 'Diferencia (min)']];
+  const porEmp = {};
+  for (const f of ultimoRegistro) (porEmp[f.empleado_id] = porEmp[f.empleado_id] || []).push(f);
+  for (const [eid, fs] of Object.entries(porEmp)) {
+    const emp = fEmpleados.find((e) => e.id === eid) || { nombre: '—' };
+    const horario = fHorarios[eid];
+    for (const g of agruparDias(fs)) {
+      const teo = minTeoricos(g.dia, horario);
+      const marcas = g.marcas.map((m) => `${m.tipo === 'entrada' ? 'E' : 'S'} ${horaLocal(m.momento)}`).join(' ');
+      filas.push([
+        emp.nombre, g.dia, marcas, fmtHM(g.trabajado),
+        (teo != null && teo > 0) ? fmtHM(teo) : '',
+        (teo != null && teo > 0) ? Math.round(g.trabajado - teo) : '',
+      ]);
+    }
+  }
+  const csv = filas.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\n');
+  const blob = new Blob([String.fromCharCode(0xFEFF) + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `fichajes_${document.getElementById('reg-desde').value}_${document.getElementById('reg-hasta').value}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// --- Solicitudes de cambio de horario -----------------------------------
+
+async function cargarSolicitudes() {
+  const cont = document.getElementById('sol-contenido');
+  const { data, error } = await supabase.from('fichaje_solicitudes').select('*').order('creado_en', { ascending: false });
+  if (error) { cont.innerHTML = `<div class="vacio">Error: ${error.message}</div>`; return; }
+  const sols = data || [];
+  const pendientes = sols.filter((s) => s.estado === 'pendiente');
+
+  const badge = document.getElementById('sol-contador');
+  badge.textContent = pendientes.length;
+  badge.style.display = pendientes.length ? '' : 'none';
+
+  if (!sols.length) { cont.innerHTML = '<div class="vacio">No hay solicitudes.</div>'; return; }
+  cont.innerHTML = sols.map(tarjetaSolicitud).join('');
+  cont.querySelectorAll('[data-accion]').forEach((b) =>
+    b.addEventListener('click', () => resolverSolicitud(sols.find((x) => x.id === b.dataset.sid), b.dataset.accion)));
+}
+
+const nombreEmp = (id) => (fEmpleados.find((e) => e.id === id) || {}).nombre || '—';
+const tramosTexto = (tr) => (tr || []).map((t) => `${t.entrada}–${t.salida}`).join(' · ');
+const diasTexto = (ds) => (ds || []).map((d) => DIAS_L[d]).join(' ');
+
+function tarjetaSolicitud(s) {
+  const pendiente = s.estado === 'pendiente';
+  const badge = pendiente ? '' : `<span class="badge ${s.estado}">${s.estado}</span>`;
+  const acciones = pendiente
+    ? `<div class="acciones">
+        <button class="btn-fila principal" data-accion="aceptada" data-sid="${s.id}">Aceptar</button>
+        <button class="btn-fila" data-accion="modificar" data-sid="${s.id}">Modificar</button>
+        <button class="btn-fila peligro" data-accion="rechazada" data-sid="${s.id}">Rechazar</button>
+      </div>`
+    : (s.respuesta_admin ? `<div class="mensaje">Respuesta: ${escapar(s.respuesta_admin)}</div>` : '');
+  return `<div class="sol-tarjeta">
+    <div class="cab">
+      <span class="nombre">${escapar(nombreEmp(s.empleado_id))}</span>
+      <span class="fecha">${fechaCorta(s.creado_en)} ${badge}</span>
+    </div>
+    <div class="propuesta">Propone: <b>${tramosTexto(s.tramos_propuestos)}</b> · días ${diasTexto(s.dias_propuestos)}</div>
+    ${s.mensaje ? `<div class="mensaje">"${escapar(s.mensaje)}"</div>` : ''}
+    ${acciones}
+  </div>`;
+}
+
+async function resolverSolicitud(s, accion) {
+  if (!s) return;
+  if (accion === 'modificar') { modalModificarSolicitud(s); return; }
+  let respuesta = null;
+  if (accion === 'rechazada') respuesta = prompt('Motivo del rechazo (opcional):') || null;
+  const { error } = await supabase.rpc('fichaje_admin_resolver_solicitud', {
+    p_solicitud_id: s.id,
+    p_estado: accion,
+    p_tramos_finales: accion === 'aceptada' ? s.tramos_propuestos : null,
+    p_dias_finales: accion === 'aceptada' ? s.dias_propuestos : null,
+    p_respuesta: respuesta,
+    p_admin: await emailAdmin(),
+  });
+  if (error) { mostrarToast('Error: ' + error.message); return; }
+  mostrarToast('Solicitud resuelta');
+  cargarSolicitudes();
+  cargarEmpleadosFichaje();
+}
+
+function modalModificarSolicitud(s) {
+  const fondo = abrirModal(`Modificar y aceptar · ${nombreEmp(s.empleado_id)}`, `
+    <label>Tramos de la jornada</label>
+    <div id="eh-tramos"></div>
+    <button class="btn-fila" id="eh-add" style="margin-top:6px">+ Añadir tramo</button>
+    <label style="margin-top:16px">Días de trabajo</label>
+    <div class="dias-chips" id="eh-dias"></div>
+    <label style="margin-top:14px">Nota para el empleado (opcional)</label>
+    <input id="ms-nota">
+  `, async (f, cerrar) => {
+    validarHorario(estado);
+    const { error } = await supabase.rpc('fichaje_admin_resolver_solicitud', {
+      p_solicitud_id: s.id,
+      p_estado: 'modificada',
+      p_tramos_finales: estado.tramos,
+      p_dias_finales: estado.dias,
+      p_respuesta: f.querySelector('#ms-nota').value.trim() || null,
+      p_admin: await emailAdmin(),
+    });
+    if (error) throw new Error(error.message);
+    cerrar();
+    cargarSolicitudes();
+    cargarEmpleadosFichaje();
+    mostrarToast('Solicitud aceptada con cambios');
+  }, 'Aceptar con cambios');
+  const estado = montarEditorHorario(fondo, s.tramos_propuestos, s.dias_propuestos);
+}
+
+// Inicializa la pestaña Fichajes la primera vez que se abre.
+document.getElementById('tabs').addEventListener('click', (e) => {
+  if (e.target.closest('button[data-vista="fichajes"]')) initFichajes();
+});
 
 // Si ya hay sesión guardada en el navegador, entrar directo sin pedir login.
 supabase.auth.getSession().then(({ data }) => {
