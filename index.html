@@ -1090,6 +1090,7 @@ function initFichajes() {
     mostrarToast('Clave regenerada');
   });
 
+  pintarEnlaceFichar();
   cargarEmpleadosFichaje().then(() => { cargarRegistro(); cargarSolicitudes(); });
 }
 
