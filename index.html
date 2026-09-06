@@ -515,6 +515,20 @@
     <div class="sub-vista" data-sub="empleados">
       <div class="tarjeta">
         <div class="tarjeta-cabecera">
+          <h2><span class="icono-titulo"><svg viewBox="0 0 24 24" class="icono"><path d="M4 17v-2a4 4 0 0 1 4-4h6M14 7l3 3-3 3M21 12a9 9 0 1 1-9-9"/></svg></span> Enlace para fichar</h2>
+        </div>
+        <p style="color:var(--texto-secundario); font-size:0.85rem; margin:6px 0 10px;">
+          Comparte este enlace con los trabajadores. La clave impide que la página funcione para quien no la tenga.
+        </p>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+          <code id="fichar-url" style="flex:1; min-width:220px; background:var(--bg); border:1px solid var(--borde); border-radius:8px; padding:9px 11px; font-size:0.8rem; overflow-x:auto; white-space:nowrap;">—</code>
+          <button class="btn-sm secundario" id="fichar-copiar">Copiar</button>
+          <button class="btn-sm secundario" id="fichar-regenerar">Regenerar clave</button>
+        </div>
+      </div>
+
+      <div class="tarjeta">
+        <div class="tarjeta-cabecera">
           <h2><span class="icono-titulo"><svg viewBox="0 0 24 24" class="icono"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Empleados</h2>
           <button class="btn-sm" id="emp-nuevo">+ Nuevo empleado</button>
         </div>
@@ -956,6 +970,7 @@ function activarFilasExpandibles(contenido) {
 let fichajesInit = false;       // la pestaña se inicializa la primera vez que se abre
 let fEmpleados = [];            // caché de empleados
 let fHorarios = {};             // empleado_id -> horario de referencia vigente
+let fClave = '';                // clave de empresa para el enlace de fichar
 let ultimoRegistro = [];        // últimos fichajes cargados (para exportar CSV)
 
 const ROLES = { almacen: 'Almacén', chofer: 'Chófer', encargado: 'Encargado', jefe: 'Jefe' };
@@ -1062,17 +1077,39 @@ function initFichajes() {
   document.getElementById('reg-nuevo').addEventListener('click', modalFichajeManual);
   document.getElementById('emp-nuevo').addEventListener('click', () => modalEmpleado(null));
 
+  document.getElementById('fichar-copiar').addEventListener('click', () => {
+    navigator.clipboard?.writeText(document.getElementById('fichar-url').textContent).then(
+      () => mostrarToast('Enlace copiado'), () => mostrarToast('No se pudo copiar'));
+  });
+  document.getElementById('fichar-regenerar').addEventListener('click', async () => {
+    if (!confirm('El enlace anterior dejará de funcionar. ¿Regenerar la clave?')) return;
+    const { data, error } = await supabase.rpc('fichaje_admin_regenerar_clave');
+    if (error) { mostrarToast('Error: ' + error.message); return; }
+    fClave = data;
+    pintarEnlaceFichar();
+    mostrarToast('Clave regenerada');
+  });
+
   cargarEmpleadosFichaje().then(() => { cargarRegistro(); cargarSolicitudes(); });
 }
 
+/// Muestra el enlace de fichar (fichar.html?e=CLAVE) construido desde la URL actual.
+function pintarEnlaceFichar() {
+  const base = new URL('fichar.html', location.href).href;
+  document.getElementById('fichar-url').textContent = fClave ? `${base}?e=${fClave}` : base;
+}
+
 async function cargarEmpleadosFichaje() {
-  const [{ data: emps, error }, { data: hs }] = await Promise.all([
+  const [{ data: emps, error }, { data: hs }, { data: cfg }] = await Promise.all([
     supabase.from('fichaje_empleados').select('*').order('nombre'),
     supabase.from('fichaje_horarios').select('*').is('vigente_hasta', null),
+    supabase.from('fichaje_config').select('clave_empresa').eq('id', 1).maybeSingle(),
   ]);
   if (error) { mostrarToast('Error al cargar empleados'); return; }
   fEmpleados = emps || [];
   fHorarios = Object.fromEntries((hs || []).map((h) => [h.empleado_id, h]));
+  fClave = cfg?.clave_empresa || '';
+  pintarEnlaceFichar();
 
   const sel = document.getElementById('reg-empleado');
   const prev = sel.value;

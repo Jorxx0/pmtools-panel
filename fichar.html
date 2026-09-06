@@ -310,6 +310,11 @@ const SUPABASE_URL = 'https://plladparekwaxsmsbxon.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_M9KPR6mrulO1HAC5369SPA_W1KTXYiy';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
 
+// Clave de empresa: va en la URL (fichar.html?e=XXXXXX) y se exige en cada
+// llamada al servidor. Sin ella la página no funciona (evita que alguien la
+// use si la encuentra por casualidad; ver docs/fichaje/schema.sql).
+const CLAVE = (new URLSearchParams(location.search).get('e') || '').toUpperCase();
+
 const DIAS_CORTOS = ['', 'L', 'M', 'X', 'J', 'V', 'S', 'D'];
 const $ = (id) => document.getElementById(id);
 
@@ -414,25 +419,29 @@ async function enviarCodigo() {
   bloquearTeclado(true);
 
   if (accionTrasCodigo === 'ver') {
-    const { data, error } = await supabase.rpc('fichaje_validar_codigo', { p_codigo: codigo });
+    const { data, error } = await supabase.rpc('fichaje_validar_codigo', { p_clave: CLAVE, p_codigo: codigo });
     bloquearTeclado(false);
-    if (error) return codigoFallido();
+    if (error) return codigoFallido(error);
     guardarSesion({ codigo, nombre: data.nombre });
     abrirMisFichajes();
     return;
   }
 
-  const { data, error } = await supabase.rpc('fichaje_marcar_codigo', { p_codigo: codigo, p_origen: 'web' });
+  const { data, error } = await supabase.rpc('fichaje_marcar_codigo', { p_clave: CLAVE, p_codigo: codigo, p_origen: 'web' });
   bloquearTeclado(false);
-  if (error) return codigoFallido();
+  if (error) return codigoFallido(error);
 
   guardarSesion({ codigo, nombre: data.nombre });
   mostrarConfirmacion(data);
 }
 
-function codigoFallido() {
+function codigoFallido(error) {
   pintarPuntos(true);
-  $('login-error').textContent = 'Código no válido.';
+  // Si el problema es la clave de la URL, el trabajador no puede arreglarlo él.
+  const esClave = error && /enlace no v/i.test(error.message || '');
+  $('login-error').textContent = esClave
+    ? 'Enlace no válido. Pide a administración el enlace correcto.'
+    : 'Código no válido.';
   $('login-error').hidden = false;
   setTimeout(() => { codigoBuffer = ''; pintarPuntos(); }, 450);
 }
@@ -504,8 +513,8 @@ async function cargarFichajes() {
 
   const [desde, hasta] = rangoFechas(rangoActual);
   const [fRes, hRes] = await Promise.all([
-    supabase.rpc('fichaje_mis_fichajes_codigo', { p_codigo: sesion.codigo, p_desde: desde, p_hasta: hasta }),
-    supabase.rpc('fichaje_mi_horario_codigo', { p_codigo: sesion.codigo }),
+    supabase.rpc('fichaje_mis_fichajes_codigo', { p_clave: CLAVE, p_codigo: sesion.codigo, p_desde: desde, p_hasta: hasta }),
+    supabase.rpc('fichaje_mi_horario_codigo', { p_clave: CLAVE, p_codigo: sesion.codigo }),
   ]);
 
   if (fRes.error) {
@@ -599,7 +608,7 @@ function pintarFichajes(fichajes, horario) {
 
 async function ficharDesdeSesion() {
   $('btn-fichar-ahora').disabled = true;
-  const { data, error } = await supabase.rpc('fichaje_marcar_codigo', { p_codigo: sesion.codigo, p_origen: 'web' });
+  const { data, error } = await supabase.rpc('fichaje_marcar_codigo', { p_clave: CLAVE, p_codigo: sesion.codigo, p_origen: 'web' });
   $('btn-fichar-ahora').disabled = false;
   if (error) { alert('No se pudo fichar. Vuelve a introducir tu código.'); return; }
   mostrarConfirmacion(data);
@@ -612,7 +621,7 @@ let tramosBorrador = [];
 let diasBorrador = [];
 
 $('btn-solicitar').addEventListener('click', async () => {
-  const { data } = await supabase.rpc('fichaje_mi_horario_codigo', { p_codigo: sesion.codigo });
+  const { data } = await supabase.rpc('fichaje_mi_horario_codigo', { p_clave: CLAVE, p_codigo: sesion.codigo });
   tramosBorrador = (data && Array.isArray(data.tramos) && data.tramos.length)
     ? data.tramos.map((t) => ({ ...t }))
     : [{ entrada: '08:00', salida: '14:00' }];
@@ -686,6 +695,7 @@ $('btn-enviar-solicitud').addEventListener('click', async () => {
   }
   $('btn-enviar-solicitud').disabled = true;
   const { error } = await supabase.rpc('fichaje_solicitar_cambio_codigo', {
+    p_clave: CLAVE,
     p_codigo: sesion.codigo,
     p_tramos: tramosBorrador, p_dias: diasBorrador,
     p_mensaje: $('solicitud-mensaje').value.trim() || null,
@@ -703,7 +713,22 @@ $('btn-enviar-solicitud').addEventListener('click', async () => {
 // ========================================================================
 //  ARRANQUE
 // ========================================================================
-if (sesion && sesion.codigo) {
+if (!CLAVE) {
+  // Falta la clave de empresa en la URL: la página no es utilizable.
+  document.querySelector('.contenedor').innerHTML = `
+    <div class="marca">
+      <div class="icono-marca">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      </div>
+      <div><h1>Fichar</h1></div>
+    </div>
+    <section class="tarjeta">
+      <div class="aviso" style="max-height:none">
+        Enlace no válido. Pide a administración el enlace correcto para fichar.
+      </div>
+    </section>`;
+} else if (sesion && sesion.codigo) {
   abrirMisFichajes();
 } else {
   reiniciarLogin();
