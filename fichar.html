@@ -124,24 +124,9 @@
 
   .icono { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -4px; }
 
-  /* --- Teclado de código --- */
+  /* --- Identificación (DNI / NIE) --- */
   .titulo-codigo { text-align: center; font-size: 1.05rem; font-weight: 600; margin: 4px 0 2px; }
-  .pin-puntos { display: flex; gap: 16px; justify-content: center; margin: 18px 0 24px; }
-  .pin-puntos span {
-    width: 15px; height: 15px; border-radius: 50%;
-    border: 2px solid var(--texto-terciario); transition: all 0.12s;
-  }
-  .pin-puntos span.lleno { background: var(--acento); border-color: var(--acento); }
-  .pin-puntos.error span { border-color: var(--rojo); animation: sacudir 0.35s; }
-  @keyframes sacudir { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
-  .teclado { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .teclado button {
-    background: var(--superficie); color: var(--texto); border: 1px solid var(--borde);
-    font-size: 1.5rem; font-weight: 500; padding: 18px 0; border-radius: 14px;
-    font-family: "Inter Tight", sans-serif;
-  }
-  .teclado button.vacio { background: none; border: none; cursor: default; }
-  .teclado button:active { background: var(--acento-suave); }
+  #campo-dni { text-transform: uppercase; }
 
   /* --- Confirmación --- */
   .confirmacion { text-align: center; padding: 12px 0; }
@@ -230,11 +215,13 @@
     </div>
   </div>
 
-  <!-- 1 · Código de empleado -->
+  <!-- 1 · DNI / NIE del empleado -->
   <section id="vista-login" class="tarjeta" hidden>
-    <div class="titulo-codigo" id="titulo-codigo">Introduce tu código</div>
-    <div class="pin-puntos" id="pin-puntos"><span></span><span></span><span></span><span></span></div>
-    <div class="teclado" id="teclado"></div>
+    <div class="titulo-codigo" id="titulo-codigo">Introduce tu DNI o NIE</div>
+    <input id="campo-dni" type="text" inputmode="text" autocomplete="off"
+           autocapitalize="characters" spellcheck="false" placeholder="12345678A"
+           style="text-align:center; font-size:1.4rem; letter-spacing:0.08em; margin-top:14px;">
+    <button id="btn-fichar" style="margin-top:14px;">Fichar</button>
     <div class="aviso" id="login-error" hidden></div>
     <button class="enlace" id="btn-modo-ver" style="display:block; margin:14px auto 0;">Solo ver mis fichajes</button>
   </section>
@@ -332,7 +319,6 @@ function guardarSesion(s) {
 function salir() {
   sesion = null;
   try { sessionStorage.removeItem('fichaje_sesion'); } catch (e) {}
-  codigoBuffer = '';
   accionTrasCodigo = 'fichar';
   reiniciarLogin();
   mostrar('vista-login');
@@ -368,17 +354,41 @@ function claveDia(iso) {
 const diaLegible = (key) => new Date(`${key}T12:00:00`).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
 
 // ========================================================================
-//  1 · LOGIN (código de 4 dígitos)
+//  1 · LOGIN (DNI / NIE)
 // ========================================================================
-let codigoBuffer = '';
 let accionTrasCodigo = 'fichar';   // 'fichar' | 'ver'
+const campoDni = $('campo-dni');
+const btnFichar = $('btn-fichar');
+
+/// Normaliza un DNI/NIE: mayúsculas, sin espacios ni guiones.
+const normDni = (s) => (s || '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+
+/// Valida un DNI o NIE por su letra de control.
+function dniValido(s) {
+  const v = normDni(s);
+  const T = 'TRWAGMYFPDXBNJZSQVHLCKE';
+  let num, letra;
+  if (/^[0-9]{8}[A-Z]$/.test(v)) {
+    num = parseInt(v.slice(0, 8), 10);
+    letra = v[8];
+  } else if (/^[XYZ][0-9]{7}[A-Z]$/.test(v)) {
+    num = parseInt('XYZ'.indexOf(v[0]) + v.slice(1, 8), 10);
+    letra = v[8];
+  } else {
+    return false;
+  }
+  return T[num % 23] === letra;
+}
 
 function reiniciarLogin() {
-  codigoBuffer = '';
-  pintarPuntos();
+  campoDni.value = '';
   $('login-error').hidden = true;
-  $('titulo-codigo').textContent = accionTrasCodigo === 'ver' ? 'Código para ver tus fichajes' : 'Introduce tu código';
+  $('titulo-codigo').textContent = accionTrasCodigo === 'ver'
+    ? 'DNI o NIE para ver tus fichajes'
+    : 'Introduce tu DNI o NIE';
+  btnFichar.textContent = accionTrasCodigo === 'ver' ? 'Ver mis fichajes' : 'Fichar';
   $('btn-modo-ver').textContent = accionTrasCodigo === 'ver' ? 'Fichar' : 'Solo ver mis fichajes';
+  try { campoDni.focus(); } catch (e) {}
 }
 
 $('btn-modo-ver').addEventListener('click', () => {
@@ -386,41 +396,29 @@ $('btn-modo-ver').addEventListener('click', () => {
   reiniciarLogin();
 });
 
-// Teclado numérico
-const teclado = $('teclado');
-['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'].forEach((t) => {
-  const b = document.createElement('button');
-  b.textContent = t;
-  if (t === '') { b.className = 'vacio'; b.disabled = true; }
-  else b.addEventListener('click', () => pulsarTecla(t));
-  teclado.appendChild(b);
+campoDni.addEventListener('input', () => {
+  const v = normDni(campoDni.value);
+  if (v !== campoDni.value) campoDni.value = v;
+  $('login-error').hidden = true;
 });
-window.addEventListener('keydown', (e) => {
-  if ($('vista-login').hidden) return;
-  if (/^[0-9]$/.test(e.key)) pulsarTecla(e.key);
-  else if (e.key === 'Backspace') pulsarTecla('⌫');
-});
+campoDni.addEventListener('keydown', (e) => { if (e.key === 'Enter') enviarCodigo(); });
+btnFichar.addEventListener('click', enviarCodigo);
 
-function pulsarTecla(t) {
-  if ($('login-error').hidden === false) $('login-error').hidden = true;
-  if (t === '⌫') codigoBuffer = codigoBuffer.slice(0, -1);
-  else if (codigoBuffer.length < 4) codigoBuffer += t;
-  pintarPuntos();
-  if (codigoBuffer.length === 4) enviarCodigo();
-}
-function pintarPuntos(error) {
-  const cont = $('pin-puntos');
-  cont.classList.toggle('error', !!error);
-  [...cont.children].forEach((s, i) => s.classList.toggle('lleno', i < codigoBuffer.length));
-}
-
+// (bloque de teclado numérico retirado — ahora es un campo de texto)
 async function enviarCodigo() {
-  const codigo = codigoBuffer;
-  bloquearTeclado(true);
+  const codigo = normDni(campoDni.value);
+  if (!dniValido(codigo)) {
+    $('login-error').textContent = 'El DNI o NIE no es válido. Revísalo.';
+    $('login-error').hidden = false;
+    return;
+  }
+  btnFichar.disabled = true;
+  campoDni.disabled = true;
 
   if (accionTrasCodigo === 'ver') {
     const { data, error } = await supabase.rpc('fichaje_validar_codigo', { p_clave: CLAVE, p_codigo: codigo });
-    bloquearTeclado(false);
+    btnFichar.disabled = false;
+    campoDni.disabled = false;
     if (error) return codigoFallido(error);
     guardarSesion({ codigo, nombre: data.nombre });
     abrirMisFichajes();
@@ -428,7 +426,8 @@ async function enviarCodigo() {
   }
 
   const { data, error } = await supabase.rpc('fichaje_marcar_codigo', { p_clave: CLAVE, p_codigo: codigo, p_origen: 'web' });
-  bloquearTeclado(false);
+  btnFichar.disabled = false;
+  campoDni.disabled = false;
   if (error) return codigoFallido(error);
 
   guardarSesion({ codigo, nombre: data.nombre });
@@ -436,17 +435,11 @@ async function enviarCodigo() {
 }
 
 function codigoFallido(error) {
-  pintarPuntos(true);
-  // Si el problema es la clave de la URL, el trabajador no puede arreglarlo él.
-  const esClave = error && /enlace no v/i.test(error.message || '');
-  $('login-error').textContent = esClave
+  const msg = error?.message || '';
+  $('login-error').textContent = /enlace no v/i.test(msg)
     ? 'Enlace no válido. Pide a administración el enlace correcto.'
-    : 'Código no válido.';
+    : 'Ese DNI o NIE no está dado de alta. Avisa a administración.';
   $('login-error').hidden = false;
-  setTimeout(() => { codigoBuffer = ''; pintarPuntos(); }, 450);
-}
-function bloquearTeclado(b) {
-  [...teclado.children].forEach((x) => { if (!x.classList.contains('vacio')) x.disabled = b; });
 }
 
 // ========================================================================
